@@ -4,7 +4,7 @@
 
 using namespace std;
 
-/*int main()
+int main()
 {
 	string newkey;
 	LONG reg;
@@ -29,5 +29,5 @@ using namespace std;
 	system("pause");
 	return 0;
 
-}*/
+}
 
