@@ -32,7 +32,7 @@ protected:
 	WFSCAMTAKEPICTEX data;
 	REQUESTID m_requestId;
 	WFSRESULT *pwfsres;
-	WFSRESULT* pwfsRes;
+	//WFSRESULT* pwfsRes;
 	void AppendStatus(CString strTxt);
 
 
@@ -66,16 +66,24 @@ public:
 
 	afx_msg void OnBnClickedOpen();
 	afx_msg void OnBnClickedStartup();
-	afx_msg void OnBnClickedAsyncOpen();
+	//afx_msg void OnBnClickedAsyncOpen();
 	CRichEditCtrl m_RichText;
 	afx_msg void OnBnClickedCleanUp();
 	afx_msg void OnBnClickedClose();
 	
 	afx_msg void OnBnClickedTakePicture();
-	afx_msg void OnBnClickedAsyncTakepictureex();
-	afx_msg void OnBnClickedAsyncclose();
+	//afx_msg void OnBnClickedAsyncTakepictureex();
+	//afx_msg void OnBnClickedAsyncclose();
 	afx_msg void OnBnClickedTakepictureEx();
-	afx_msg void OnBnClickedAsynctakepicture();
+	//afx_msg void OnBnClickedAsynctakepicture();
 	afx_msg void OnBnClickedReset();
-	afx_msg void OnBnClickedAsyncReset();
+	//afx_msg void OnBnClickedAsyncReset();
+	CButton m_AsyncCheck;
+	BOOL m_AsyncCheckVal;
+	CButton m_btnStartup;
+	CButton m_btnOpen;
+	CButton m_btnTakepic;
+	CButton m_btnTakepicEx;
+	CButton m_btnReset;
+	CButton m_btnClose;
 };

@@ -4,6 +4,7 @@
 #include "Ccamera.h"
 #include "Cprinter.h"
 #include "CPinpad.h"
+#include "CSensor.h"
 #pragma once
 
 
@@ -46,4 +47,5 @@ public:
 	CPinpad m_pinpad;
 	afx_msg void OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult);
 	
+	CSensor m_sensor;
 };

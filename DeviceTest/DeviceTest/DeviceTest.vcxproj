@@ -192,6 +192,7 @@
     <ClInclude Include="Ccamera.h" />
     <ClInclude Include="CPinpad.h" />
     <ClInclude Include="Cprinter.h" />
+    <ClInclude Include="CSensor.h" />
     <ClInclude Include="DeviceTest.h" />
     <ClInclude Include="DeviceTestDlg.h" />
     <ClInclude Include="framework.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="Ccamera.cpp" />
     <ClCompile Include="CPinpad.cpp" />
     <ClCompile Include="Cprinter.cpp" />
+    <ClCompile Include="CSensor.cpp" />
     <ClCompile Include="DeviceTest.cpp" />
     <ClCompile Include="DeviceTestDlg.cpp" />
     <ClCompile Include="pch.cpp">

@@ -42,6 +42,9 @@
     <ClInclude Include="CPinpad.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DeviceTest.cpp">
@@ -60,6 +63,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CPinpad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSensor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

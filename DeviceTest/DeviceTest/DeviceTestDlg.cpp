@@ -107,32 +107,72 @@ BOOL CDeviceTestDlg::OnInitDialog()
 	CString str;
 
 	int i[10] = { 0 };
-	str.Format(L"PINPAD");
+	str.Format(L"SENSOR UNIT");
 	m_tab.InsertItem(i[0], str);
 
-
-	str.Format(L"PRINTER");
+	str.Format(L"PINPAD");
 	m_tab.InsertItem(i[1], str);
 
-	
+	str.Format(L"PRINTER");
+	m_tab.InsertItem(i[2], str);
 	
 	str.Format(L"CAMERA");
-	m_tab.InsertItem(i[2], str);
+	m_tab.InsertItem(i[3], str);
+
+
 
 	CRect rect;
 	m_tab.GetClientRect(&rect);
 	m_cam.Create(IDD_Camdlg, &m_tab);
 	m_cam.SetWindowPos(NULL, 5, 25, rect.Width() , rect.Height() , SWP_SHOWWINDOW | SWP_NOZORDER);
+	m_cam.m_btnOpen.EnableWindow(FALSE);
+	m_cam.m_btnClose.EnableWindow(FALSE);
+	m_cam.m_btnTakepic.EnableWindow(FALSE);
+	m_cam.m_btnTakepicEx.EnableWindow(FALSE);
+	m_cam.m_btnReset.EnableWindow(FALSE);
 	m_pwndShow = &m_cam;
 
 	m_print.Create(IDD_Printerdlg, &m_tab);
-	m_print.SetWindowPos(NULL, 5, 25, rect.Width() , rect.Height() , SWP_SHOWWINDOW | SWP_NOZORDER);
+	m_print.SetWindowPos(NULL, 5, 25, rect.Width() , rect.Height() , SWP_NOSIZE | SWP_NOZORDER);
+	m_print.m_btnOpen.EnableWindow(FALSE);
+	m_print.m_btnClose.EnableWindow(FALSE);
+	m_print.m_btnCutPaper.EnableWindow(FALSE);
+	m_print.m_btnPrintForm.EnableWindow(FALSE);
+	m_print.m_btnReset.EnableWindow(FALSE);
+	m_print.m_btnSelectFile.EnableWindow(FALSE);
+	m_print.m_Dispense.EnableWindow(FALSE);
+	m_print.m_PrintData.EnableWindow(FALSE);
+	m_print.m_PrintFile.EnableWindow(FALSE);
+	m_print.m_editprintdata.EnableWindow(TRUE);
 	m_pwndShow = &m_print;
 
 	m_pinpad.Create(IDD_Pinpaddlg, &m_tab);
 	m_pinpad.SetWindowPos(NULL, 5, 25, rect.Width(), rect.Height(), SWP_SHOWWINDOW | SWP_NOZORDER);
+	m_pinpad.m_btnStartup.EnableWindow(TRUE);
+	m_pinpad.m_btnopen.EnableWindow(FALSE);
+	m_pinpad.m_btnclose.EnableWindow(FALSE);
+	m_pinpad.m_btnhsm.EnableWindow(FALSE);
+	m_pinpad.m_btndeletekey.EnableWindow(FALSE);
+	m_pinpad.m_btnCryptdata.EnableWindow(FALSE);
+	m_pinpad.m_btndeviceid.EnableWindow(FALSE);
+	m_pinpad.m_btnfunkey.EnableWindow(FALSE);
+	m_pinpad.m_btngetcaps.EnableWindow(FALSE);
+	m_pinpad.m_btnGetpin.EnableWindow(FALSE);
+	m_pinpad.m_btngetstatus.EnableWindow(FALSE);
+	m_pinpad.m_btnkeydetails.EnableWindow(FALSE);
+	m_pinpad.m_btnkeydetailsex.EnableWindow(FALSE);
+	m_pinpad.m_btnloadkey.EnableWindow(FALSE);
+	m_pinpad.m_btnsecurekey.EnableWindow(FALSE);
 	m_pwndShow = &m_pinpad;
 
+	m_sensor.Create(IDD_SIUnitdlg, &m_tab);
+	m_sensor.SetWindowPos(NULL, 5, 25, rect.Width(), rect.Height(), SWP_SHOWWINDOW | SWP_NOZORDER);
+	m_sensor.m_btnClose.EnableWindow(FALSE);
+	m_sensor.m_btnOpen.EnableWindow(FALSE);
+	m_sensor.m_btnCloseShutter.EnableWindow(FALSE);
+	m_sensor.m_btnOpenShutter.EnableWindow(FALSE);
+	m_sensor.m_btnGuideLight.EnableWindow(FALSE);
+	m_pwndShow = &m_sensor;
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -210,8 +250,13 @@ void CDeviceTestDlg::OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult)
 
 
 	case 2:
-		m_pinpad.ShowWindow(SW_SHOW);
+		m_pinpad.ShowWindow(SW_SHOWNORMAL);
 		m_pwndShow = &m_pinpad;
+		break;
+
+	case 3:
+		m_sensor.ShowWindow(SW_SHOW);
+		m_pwndShow = &m_sensor;
 		break;
 	}
 

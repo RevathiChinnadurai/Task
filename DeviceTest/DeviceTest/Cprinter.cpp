@@ -18,6 +18,7 @@ IMPLEMENT_DYNAMIC(Cprinter, CDialogEx)
 
 Cprinter::Cprinter(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_Printerdlg, pParent)
+	, m_AsyncCheckVal(FALSE)
 {
 
 }
@@ -32,13 +33,24 @@ void Cprinter::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_RICHEDIT21, m_richprint);
 	DDX_Control(pDX, IDC_EDIT_PrintData, m_editprintdata);
 	DDX_Control(pDX, IDC_EDIT1, m_edtFileName);
+	DDX_Check(pDX, IDC_CHECK2, m_AsyncCheckVal);
+	DDX_Control(pDX, IDC_StartUp, m_btnStartup);
+	DDX_Control(pDX, IDC_BUTTON1, m_btnOpen);
+	DDX_Control(pDX, IDC_BUTTON6, m_btnSelectFile);
+	DDX_Control(pDX, IDC_PrintFile, m_PrintFile);
+	DDX_Control(pDX, IDC_PrintData, m_PrintData);
+	DDX_Control(pDX, IDC_Reset, m_btnReset);
+	DDX_Control(pDX, IDC_Dispensepaper, m_Dispense);
+	DDX_Control(pDX, IDC_Cutpaper, m_btnCutPaper);
+	DDX_Control(pDX, IDC_Printform, m_btnPrintForm);
+	DDX_Control(pDX, IDC_Close, m_btnClose);
 }
 
 
 BEGIN_MESSAGE_MAP(Cprinter, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &Cprinter::OnBnClickedOpen)
-	ON_BN_CLICKED(IDC_BUTTON2, &Cprinter::OnBnClickedStartUp)
-	ON_BN_CLICKED(IDC_BUTTON3, &Cprinter::OnBnClickedAsyncOPen)
+	//ON_BN_CLICKED(IDC_BUTTON2, &Cprinter::OnBnClickedStartUp)
+	//ON_BN_CLICKED(IDC_BUTTON3, &Cprinter::OnBnClickedAsyncOPen)
 	ON_BN_CLICKED(IDC_BUTTON6, &Cprinter::OnBnClickedSelectFile)
 
 
@@ -68,15 +80,16 @@ BEGIN_MESSAGE_MAP(Cprinter, CDialogEx)
 	ON_BN_CLICKED(IDC_Dispensepaper, &Cprinter::OnBnClickedDispensepaper)
 	ON_BN_CLICKED(IDC_Cutpaper, &Cprinter::OnBnClickedCutpaper)
 	ON_BN_CLICKED(IDC_Printform, &Cprinter::OnBnClickedPrintform)
-	ON_BN_CLICKED(IDC_Async_Print_File, &Cprinter::OnBnClickedAsyncPrintFile)
-	ON_BN_CLICKED(IDC_AsyncPrintData, &Cprinter::OnBnClickedAsyncprintdata)
-	ON_BN_CLICKED(IDC_Async_Dispense_Paper, &Cprinter::OnBnClickedAsyncDispensePaper)
-	ON_BN_CLICKED(IDC_AsyncReset, &Cprinter::OnBnClickedAsyncreset)
-	ON_BN_CLICKED(IDC_Async_CutPaper, &Cprinter::OnBnClickedAsyncCutpaper)
-	ON_BN_CLICKED(IDC_Async_PrintForm, &Cprinter::OnBnClickedAsyncPrintform)
+	//ON_BN_CLICKED(IDC_Async_Print_File, &Cprinter::OnBnClickedAsyncPrintFile)
+	//ON_BN_CLICKED(IDC_AsyncPrintData, &Cprinter::OnBnClickedAsyncprintdata)
+	//ON_BN_CLICKED(IDC_Async_Dispense_Paper, &Cprinter::OnBnClickedAsyncDispensePaper)
+	//ON_BN_CLICKED(IDC_AsyncReset, &Cprinter::OnBnClickedAsyncreset)
+	//ON_BN_CLICKED(IDC_Async_CutPaper, &Cprinter::OnBnClickedAsyncCutpaper)
+	//ON_BN_CLICKED(IDC_Async_PrintForm, &Cprinter::OnBnClickedAsyncPrintform)
 	ON_BN_CLICKED(IDC_CleanUp, &Cprinter::OnBnClickedCleanup)
 	ON_BN_CLICKED(IDC_Close, &Cprinter::OnBnClickedClose)
-	ON_BN_CLICKED(IDC_AsyncClose, &Cprinter::OnBnClickedAsyncclose)
+	//ON_BN_CLICKED(IDC_AsyncClose, &Cprinter::OnBnClickedAsyncclose)
+	ON_BN_CLICKED(IDC_StartUp, &Cprinter::OnBnClickedStartup)
 END_MESSAGE_MAP()
 
 LRESULT Cprinter::OnOpenComplete(WPARAM wParam, LPARAM lParam)
@@ -322,94 +335,254 @@ void Cprinter::UnLock()
 	{
 		strTxt.Format(L"WFSUnlock completed");
 	}
+
+	AppendStatus(strTxt);
+}
+void Cprinter::OnBnClickedStartup()
+{
+	HRESULT hRes;
+	CString strTxt;
+	if ((hRes = m_pXFSManager->WFSStartUp(0x1403, &m_wfsXFSManagerVersion)) != WFS_SUCCESS)
+	{
+		strTxt.Format(L"WFSStartUp HRESULT = %d", hRes);
+	}
+	else
+	{
+		strTxt.Format(L"Printer   Startup completed ");
+		m_btnOpen.EnableWindow(TRUE);
+	}
 	AppendStatus(strTxt);
 }
 
 
 void Cprinter::OnBnClickedOpen()
 {
-
+	
 	HRESULT hRes;
 	CString strTxt;
-	if ((hRes = m_pXFSManager->WFSOpen("ITASPrinter", WFS_DEFAULT_HAPP, "PTRSPTest", WFS_TRACE_ALL_SPI,
-		WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService)) != WFS_SUCCESS)
+
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSOpen HRESULT = %d", hRes);
+		if ((hRes = m_pXFSManager->WFSOpen("ITASPrinter", WFS_DEFAULT_HAPP, "PTRSPTest", WFS_TRACE_ALL_SPI,
+			WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSOpen HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSOpen completed");
+			m_btnStartup.EnableWindow(FALSE);
+			m_btnCutPaper.EnableWindow(TRUE);
+			m_btnClose.EnableWindow(TRUE);
+			m_btnPrintForm.EnableWindow(TRUE);
+			m_btnReset.EnableWindow(TRUE);
+			m_btnSelectFile.EnableWindow(TRUE);
+			m_PrintFile.EnableWindow(TRUE);
+			m_Dispense.EnableWindow(TRUE);
+			m_PrintData.EnableWindow(TRUE);
+			
+		}
+		AppendStatus(strTxt);
+
+		if ((hRes = m_pXFSManager->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSRegister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSRegister completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+		Lock();
+		LPWFSPTRCAPS lpCaps;
+		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpCaps = (LPWFSPTRCAPS)pwfsRes->lpBuffer;
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES completed\r\n");
+		}
+		AppendStatus(strTxt);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
+		pwfsRes = NULL;
+		LPWFSPTRSTATUS lpStatus;
+		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_STATUS HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpStatus = (LPWFSPTRSTATUS)pwfsRes->lpBuffer;
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_STATUS completed\r\n");
+		}
+		AppendStatus(strTxt);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
+		try
+		{
+			pwfsRes = NULL;
+			if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_MEDIA_LIST, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+			{
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_MEDIA_LIST HRESULT = %d", hRes);
+			}
+			else
+			{
+				LPSTR lpMediaList = (LPSTR)pwfsRes->lpBuffer;
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_MEDIA_LIST completed : %s\r\n", CString(lpMediaList));
+			}
+			AppendStatus(strTxt);
+			m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
+			pwfsRes = NULL;
+			LPSTR lpFormList = NULL;
+			if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_FORM_LIST, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+			{
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_FORM_LIST HRESULT = %d", hRes);
+			}
+			else
+			{
+				lpFormList = (LPSTR)pwfsRes->lpBuffer;
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_FORM_LIST completed : %s\r\n", CString(lpFormList));
+			}
+			AppendStatus(strTxt);
+			m_pXFSManager->WFMFreeBuffer(pwfsRes);
+	/*		CStringA str(lpFormList);
+
+			pwfsRes = NULL;
+			if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_QUERY_FORM, str.GetBuffer(), WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+			{
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_QUERY_FORM HRESULT = %d", hRes);
+			}
+			else
+			{
+				LPWFSFRMHEADER lpForm = (LPWFSFRMHEADER)pwfsRes->lpBuffer;
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_QUERY_FORM completed : %s\r\n", CString(lpForm->lpszFormName));
+			}
+			AppendStatus(strTxt);
+			m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
+			pwfsRes = NULL;
+			WFSPTRQUERYFIELD qField;
+			CStringA field("Account Number");
+			m_pXFSManager->WFMAllocateBuffer(64, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&qField.lpszFieldName);
+			m_pXFSManager->WFMAllocateBuffer(64, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&qField.lpszFormName);
+
+			strncpy_s(qField.lpszFormName, 64, str.GetBuffer(), str.GetLength());
+			strncpy_s(qField.lpszFieldName, 64, field.GetBuffer(), field.GetLength());
+
+			if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_QUERY_FIELD, &qField, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+			{
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_QUERY_FIELD HRESULT = %d", hRes);
+			}
+			else
+			{
+				LPWFSFRMFIELD* lpField = (LPWFSFRMFIELD*)pwfsRes->lpBuffer;
+				strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_QUERY_FIELD completed : %s\r\n", CString(lpField[0]->lpszFieldName));
+			}
+			AppendStatus(strTxt);
+			m_pXFSManager->WFMFreeBuffer(pwfsRes);*/
+		}
+		catch (CException& e)
+		{
+
+		}
+		UnLock();
+	}
+else
+{
+	if ((hRes = m_pXFSManager->WFSAsyncOpen("ITASPrinter", WFS_DEFAULT_HAPP, "PTRSPTest", WFS_TRACE_ALL_SPI,
+		WFS_INDEFINITE_WAIT, &m_hService, m_hWnd, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_requestId)) != WFS_SUCCESS)
+	{
+		strTxt.Format(L"WFSAsyncOpen HRESULT = %d", hRes);
 	}
 	else
 	{
-		strTxt.Format(L"WFSOpen completed");
+		strTxt.Format(L"WFSAsyncOpen completed");
+		m_btnStartup.EnableWindow(FALSE);
+		m_btnCutPaper.EnableWindow(TRUE);
+		m_btnClose.EnableWindow(TRUE);
+		m_btnPrintForm.EnableWindow(TRUE);
+		m_btnReset.EnableWindow(TRUE);
+		m_btnSelectFile.EnableWindow(TRUE);
+		m_PrintFile.EnableWindow(TRUE);
+		m_Dispense.EnableWindow(TRUE);
+		m_PrintData.EnableWindow(TRUE);
 	}
 	AppendStatus(strTxt);
 
-	if ((hRes = m_pXFSManager->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+	if ((hRes = m_pXFSManager->WFSAsyncRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 	{
-		strTxt.Format(L"WFSRegister HRESULT = %d", hRes);
+		strTxt.Format(L"WFSAsyncRegister HRESULT = %d", hRes);
 	}
 	else
 	{
-		strTxt.Format(L"WFSRegister completed");
+		strTxt.Format(L"WFSAsyncRegister completed");
 	}
 	AppendStatus(strTxt);
 
-	UnLock();
-	Lock();
-	WFSRESULT* pwfsRes;
+	AsyncUnLock();
+	AsyncLock();
 	LPWFSPTRCAPS lpCaps;
-	if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_PTR_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 	{
-		strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES HRESULT = %d", hRes);
+		strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_CAPABILITIES HRESULT = %d", hRes);
 	}
 	else
 	{
 		lpCaps = (LPWFSPTRCAPS)pwfsRes->lpBuffer;
-		strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES completed\r\n");
+		strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_CAPABILITIES completed\r\n");
 	}
 	AppendStatus(strTxt);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+	m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 	pwfsRes = NULL;
 	LPWFSPTRSTATUS lpStatus;
-	if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_PTR_STATUS, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 	{
-		strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_STATUS HRESULT = %d", hRes);
+		strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_STATUS HRESULT = %d", hRes);
 	}
 	else
 	{
 		lpStatus = (LPWFSPTRSTATUS)pwfsRes->lpBuffer;
-		strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_STATUS completed\r\n");
+		strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_STATUS completed\r\n");
 	}
 	AppendStatus(strTxt);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+	m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 	try
 	{
 		pwfsRes = NULL;
-		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_MEDIA_LIST, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_PTR_MEDIA_LIST, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
-			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_MEDIA_LIST HRESULT = %d", hRes);
+			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_MEDIA_LIST HRESULT = %d", hRes);
 		}
 		else
 		{
 			LPSTR lpMediaList = (LPSTR)pwfsRes->lpBuffer;
-			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_MEDIA_LIST completed : %s\r\n", CString(lpMediaList));
+			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_MEDIA_LIST completed : %s\r\n", CString(lpMediaList));
 		}
 		AppendStatus(strTxt);
 		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		pwfsRes = NULL;
 		LPSTR lpFormList = NULL;
-		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_FORM_LIST, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_PTR_MEDIA_LIST, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
-			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_FORM_LIST HRESULT = %d", hRes);
+			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_FORM_LIST HRESULT = %d", hRes);
 		}
 		else
 		{
 			lpFormList = (LPSTR)pwfsRes->lpBuffer;
-			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_FORM_LIST completed : %s\r\n", CString(lpFormList));
+			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_FORM_LIST completed : %s\r\n", CString(lpFormList));
 		}
 		AppendStatus(strTxt);
-		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 /*		CStringA str(lpFormList);
 
 		pwfsRes = NULL;
@@ -450,27 +623,11 @@ void Cprinter::OnBnClickedOpen()
 	{
 
 	}
-	UnLock();
+	AsyncUnLock();
+}
 }
 
-
-void Cprinter::OnBnClickedStartUp()
-{
-	HRESULT hRes;
-	CString strTxt;
-	if ((hRes = m_pXFSManager->WFSStartUp(0x1403, &m_wfsXFSManagerVersion)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSStartUp HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"Printer   Startup completed ");
-	}
-	AppendStatus(strTxt);
-}
-
-
-void Cprinter::OnBnClickedAsyncOPen()
+/*void Cprinter::OnBnClickedAsyncOPen()
 {
 	HRESULT hRes;
 	CString strTxt;
@@ -586,14 +743,14 @@ void Cprinter::OnBnClickedAsyncOPen()
 			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_QUERY_FIELD completed : %s\r\n", CString(lpField[0]->lpszFieldName));
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFMFreeBuffer(pwfsRes);*/
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 	}
 	catch (CException& e)
 	{
 
 	}
 	AsyncUnLock();
-}
+}*/
 
 
 void Cprinter::OnEnChangeRichedit21()
@@ -648,28 +805,48 @@ void Cprinter::OnBnClickedPrintfile()
 	CString strTxt;
 	m_edtFileName.GetWindowText(strTxt);
 	CStringA strData(strTxt);
-
 	WFSPTRPRINTRAWFILE ipData;
 	m_pXFSManager->WFMAllocateBuffer(strData.GetLength() + 1, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData.lpszFileName);
 	memset(ipData.lpszFileName, 0, strData.GetLength() + 1);
 	strcpy_s(ipData.lpszFileName, strData.GetLength() + 1, CStringA(strData).GetBuffer());
 	ipData.dwMediaControl = 0;
 	ipData.dwPaperSource = 1;
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_PRINT_RAW_FILE, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		
+		Lock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_PRINT_RAW_FILE, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_CMD_PTR_PRINT_RAW_FILE completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_CMD_PTR_PRINT_RAW_FILE completed");
+		AsyncLock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_PRINT_RAW_FILE, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_PRINT_RAW_FILE completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
 	}
-	AppendStatus(strTxt);
-
-	UnLock();
-
 }
 
 
@@ -685,21 +862,41 @@ void Cprinter::OnBnClickedPrintdata()
 	memcpy(ipData.lpbData, CStringA(strData).GetBuffer(), strData.GetLength() + 1);
 	ipData.ulSize = strData.GetLength();
 	ipData.wInputData = 1;
-
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_RAW_DATA, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		Lock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_RAW_DATA, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_CMD_PTR_RAW_DATA completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_CMD_PTR_RAW_DATA completed");
-	}
-	AppendStatus(strTxt);
+		AsyncLock();
 
-	UnLock();
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_RAW_DATA, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_RAW_DATA completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
+	}
 }
 
 
@@ -710,21 +907,43 @@ void Cprinter::OnBnClickedReset()
 	WFSPTRRESET reset;
 	reset.dwMediaControl = WFS_PTR_CTRLEXPEL;
 	reset.usRetractBinNumber = 0;
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_RESET, &reset, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSExecute - WFS_PTR_RESET completed");
-	}
-	AppendStatus(strTxt);
+		Lock();
 
-	UnLock();
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_RESET, &reset, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_PTR_RESET completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+	}
+	else 
+	{
+		AsyncLock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_RESET, &reset, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_PTR_RESET completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
+	}
 }
+
 
 
 void Cprinter::OnBnClickedDispensepaper()
@@ -734,22 +953,43 @@ void Cprinter::OnBnClickedDispensepaper()
 	LPWORD ipData;
 	m_pXFSManager->WFMAllocateBuffer(sizeof(WORD), WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData);
 	*ipData = WFS_PTR_PAPERANY;
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_DISPENSE_PAPER, ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		Lock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_DISPENSE_PAPER, ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+		m_pXFSManager->WFMFreeBuffer(ipData);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
-	}
-	AppendStatus(strTxt);
+		AsyncLock();
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_DISPENSE_PAPER, ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
+		}
+		AppendStatus(strTxt);
 
-	UnLock();
-	//m_pXFSManager->WFMFreeBuffer(ipData);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		AsyncUnLock();
+		m_pXFSManager->WFMFreeBuffer(ipData);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+	}
 }
 
 
@@ -760,23 +1000,42 @@ void Cprinter::OnBnClickedCutpaper()
 	LPWORD ipData;
 	m_pXFSManager->WFMAllocateBuffer(sizeof(WORD), WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData);
 	*ipData = WFS_PTR_CTRLCUT;
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_CONTROL_MEDIA, ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		Lock();
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_CONTROL_MEDIA, ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_PTR_CTRLCUT completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+		m_pXFSManager->WFMFreeBuffer(ipData);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_PTR_CTRLCUT completed");
-	}
-	AppendStatus(strTxt);
+		AsyncLock();
+		//WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_CONTROL_MEDIA, ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_PTR_CTRLCUT completed");
+		}
+		AppendStatus(strTxt);
 
-	UnLock();
-	//m_pXFSManager->WFMFreeBuffer(ipData);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
-	
+		AsyncUnLock();
+		m_pXFSManager->WFMFreeBuffer(ipData);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+	}
 }
 
 
@@ -814,213 +1073,43 @@ void Cprinter::OnBnClickedPrintform()
 	if (Form.lpszFields)
 		memcpy_s(Form.lpszFields, nLen, buff, nLen);
 	Form.wPaperSource = WFS_PTR_PAPERUPPER;
-	Lock();
+	UpdateData(TRUE);
 
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_PRINT_FORM, &Form, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		Lock();
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_PRINT_FORM, &Form, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
-	}
-	AppendStatus(strTxt);
 
-	UnLock();
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		AsyncLock();
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_PRINT_FORM, &Form, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);	
+
+	}
 }
-
-
-void Cprinter::OnBnClickedAsyncPrintFile()
-{
-	HRESULT hRes;
-	CString strTxt;
-	m_edtFileName.GetWindowText(strTxt);
-	CStringA strData(strTxt);
-
-	WFSPTRPRINTRAWFILE ipData;
-	m_pXFSManager->WFMAllocateBuffer(strData.GetLength() + 1, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData.lpszFileName);
-	memset(ipData.lpszFileName, 0, strData.GetLength() + 1);
-	strcpy_s(ipData.lpszFileName, strData.GetLength() + 1, CStringA(strData).GetBuffer());
-	ipData.dwMediaControl = 0;
-	ipData.dwPaperSource = 1;
-	AsyncLock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_PRINT_RAW_FILE, &ipData, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_PRINT_RAW_FILE completed");
-	}
-	AppendStatus(strTxt);
-
-	AsyncUnLock();
-
-}
-
-
-void Cprinter::OnBnClickedAsyncprintdata()
-{
-	HRESULT hRes;
-	CString strTxt;
-	m_editprintdata.GetWindowText(strTxt);
-	CStringA strData(strTxt);
-	WFSPTRRAWDATA ipData;
-	m_pXFSManager->WFMAllocateBuffer(strData.GetLength() + 1, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData.lpbData);
-	memset(ipData.lpbData, 0, strData.GetLength() + 1);
-	memcpy(ipData.lpbData, CStringA(strData).GetBuffer(), strData.GetLength() + 1);
-	ipData.ulSize = strData.GetLength();
-	ipData.wInputData = 1;
-
-	AsyncLock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_RAW_DATA, &ipData, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_RAW_DATA completed");
-	}
-	AppendStatus(strTxt);
-
-	AsyncUnLock();
-}
-
-
-void Cprinter::OnBnClickedAsyncDispensePaper()
-{
-	HRESULT hRes;
-	CString strTxt;
-	LPWORD ipData;
-	m_pXFSManager->WFMAllocateBuffer(sizeof(WORD), WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData);
-	*ipData = WFS_PTR_PAPERANY;
-	AsyncLock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_DISPENSE_PAPER, ipData, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId) )!= WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
-	}
-	AppendStatus(strTxt);
-
-	AsyncUnLock();
-	//m_pXFSManager->WFMFreeBuffer(ipData);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
-}
-
-
-void Cprinter::OnBnClickedAsyncreset()
-{
-	HRESULT hRes;
-	CString strTxt;
-	WFSPTRRESET reset;
-	reset.dwMediaControl = WFS_PTR_CTRLEXPEL;
-	reset.usRetractBinNumber = 0;
-	AsyncLock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_RESET, &reset, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncExecute - WFS_PTR_RESET completed");
-	}
-	AppendStatus(strTxt);
-
-	AsyncUnLock();
-}
-
-
-void Cprinter::OnBnClickedAsyncCutpaper()
-{
-	HRESULT hRes;
-	CString strTxt;
-	LPWORD ipData;
-	m_pXFSManager->WFMAllocateBuffer(sizeof(WORD), WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&ipData);
-	*ipData = WFS_PTR_CTRLCUT;
-	AsyncLock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_CONTROL_MEDIA, ipData, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncExecute - WFS_PTR_CTRLCUT completed");
-	}
-	AppendStatus(strTxt);
-
-	AsyncUnLock();
-	//m_pXFSManager->WFMFreeBuffer(ipData);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
-}
-
-
-void Cprinter::OnBnClickedAsyncPrintform()
-{
-	HRESULT hRes;
-	CString strTxt;
-	WFSPTRPRINTFORM Form = { 0 };
-	CStringA strForm = "DemoForm";
-	CStringA strMedia = "Media";
-	CStringArray strField;
-	strField.Add(L"Name=MOHANKUMAR");
-	strField.Add(L"Account Number=123456789");
-
-	char buff[1024] = { 0 };
-	int nLen = 0;
-	for (int i = 0; i < strField.GetCount(); i++)
-	{
-		CStringA str = CStringA(strField.GetAt(i));
-		memcpy(&buff[nLen], str.GetBuffer(), str.GetLength());
-		nLen += str.GetLength() + 1;
-	}
-	nLen++;
-
-	m_pXFSManager->WFMAllocateBuffer(strForm.GetLength() + 1, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&Form.lpszFormName);
-	if (Form.lpszFormName)
-		strcpy_s(Form.lpszFormName, strForm.GetLength() + 1, strForm.GetBuffer());
-	m_pXFSManager->WFMAllocateBuffer(strMedia.GetLength() + 1, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&Form.lpszMediaName);
-	if (Form.lpszMediaName)
-		strcpy_s(Form.lpszMediaName, strMedia.GetLength() + 1, strMedia.GetBuffer());
-	Form.wOffsetX = 0;
-	Form.wOffsetY = 0;
-
-	m_pXFSManager->WFMAllocateBuffer(nLen, WFS_MEM_SHARE | WFS_MEM_ZEROINIT, (LPVOID*)&Form.lpszFields);
-	if (Form.lpszFields)
-		memcpy_s(Form.lpszFields, nLen, buff, nLen);
-	Form.wPaperSource = WFS_PTR_PAPERUPPER;
-	AsyncLock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_PRINT_FORM, &Form, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
-	}
-	AppendStatus(strTxt);
-
-	AsyncUnLock();
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);	
-}
-
-
 void Cprinter::OnBnClickedCleanup()
 {
 	HRESULT hRes;
@@ -1032,6 +1121,8 @@ void Cprinter::OnBnClickedCleanup()
 	else
 	{
 		strTxt.Format(L"WFSCleanUp completed");
+		m_btnStartup.EnableWindow(TRUE);
+		m_btnOpen.EnableWindow(FALSE);
 	}
 	AppendStatus(strTxt);
 }
@@ -1041,51 +1132,68 @@ void Cprinter::OnBnClickedClose()
 {
 	HRESULT hRes;
 	CString strTxt;
-
-	if ((hRes = m_pXFSManager->WFSDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSDeregister HRESULT = %d", hRes);
+		if ((hRes = m_pXFSManager->WFSDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSDeregister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSDeregister completed");
+		}
+		AppendStatus(strTxt);
+
+		if ((hRes = m_pXFSManager->WFSClose(m_hService)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSClose HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSClose completed");
+			m_btnStartup.EnableWindow(TRUE);
+			m_btnCutPaper.EnableWindow(FALSE);
+			m_btnClose.EnableWindow(FALSE);
+			m_btnPrintForm.EnableWindow(FALSE);
+			m_btnReset.EnableWindow(FALSE);
+			m_btnSelectFile.EnableWindow(FALSE);
+			m_PrintFile.EnableWindow(FALSE);
+			m_Dispense.EnableWindow(FALSE);
+			m_PrintData.EnableWindow(FALSE);
+		}
+		AppendStatus(strTxt);
 	}
 	else
 	{
-		strTxt.Format(L"WFSDeregister completed");
-	}
-	AppendStatus(strTxt);
+		if ((hRes = m_pXFSManager->WFSAsyncDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncDeregister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncDeregister completed");
+		}
+		AppendStatus(strTxt);
 
-	if ((hRes = m_pXFSManager->WFSClose(m_hService)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSClose HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSClose completed");
-	}
-	AppendStatus(strTxt);
-}
+		if ((hRes = m_pXFSManager->WFSAsyncClose(m_hService, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncClose HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncClose completed");
+			m_btnStartup.EnableWindow(TRUE);
+			m_btnCutPaper.EnableWindow(FALSE);
+			m_btnClose.EnableWindow(FALSE);
+			m_btnPrintForm.EnableWindow(FALSE);
+			m_btnReset.EnableWindow(FALSE);
+			m_btnSelectFile.EnableWindow(FALSE);
+			m_PrintFile.EnableWindow(FALSE);
+			m_Dispense.EnableWindow(FALSE);
+			m_PrintData.EnableWindow(FALSE);
+		}
+		AppendStatus(strTxt);
 
-
-void Cprinter::OnBnClickedAsyncclose()
-{
-	HRESULT hRes;
-	CString strTxt;
-
-	if ((hRes = m_pXFSManager->WFSAsyncDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd, m_hWnd, &m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncDeregister HRESULT = %d", hRes);
 	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncDeregister completed");
-	}
-	AppendStatus(strTxt);
-
-	if ((hRes = m_pXFSManager->WFSAsyncClose(m_hService, m_hWnd, &m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncClose HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncClose completed");
-	}
-	AppendStatus(strTxt);
 }

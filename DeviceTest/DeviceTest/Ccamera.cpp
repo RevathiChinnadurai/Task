@@ -17,10 +17,10 @@ IMPLEMENT_DYNAMIC(Ccamera, CDialogEx)
 
 Ccamera::Ccamera(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_Camdlg, pParent)
+	, m_AsyncCheckVal(FALSE)
 {
 	m_pXFSManager = XFSManagerWrapper::GetInstance();
 }
-
 Ccamera::~Ccamera()
 {
 }
@@ -29,13 +29,21 @@ void Ccamera::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_RICHEDIT21, m_RichText);
+	DDX_Control(pDX, IDC_CHECK1, m_AsyncCheck);
+	DDX_Check(pDX, IDC_CHECK1, m_AsyncCheckVal);
+	DDX_Control(pDX, IDC_BUTTON2, m_btnStartup);
+	DDX_Control(pDX, IDC_BUTTON1, m_btnOpen);
+	DDX_Control(pDX, IDC_BUTTON6, m_btnTakepic);
+	DDX_Control(pDX, IDC_TakePicture_Ex, m_btnTakepicEx);
+	DDX_Control(pDX, IDC_Reset, m_btnReset);
+	DDX_Control(pDX, IDC_BUTTON5, m_btnClose);
 }
 
 
 BEGIN_MESSAGE_MAP(Ccamera, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON1, &Ccamera::OnBnClickedOpen)
 	ON_BN_CLICKED(IDC_BUTTON2, &Ccamera::OnBnClickedStartup)
-	ON_BN_CLICKED(IDC_BUTTON3, &Ccamera::OnBnClickedAsyncOpen)
+	//ON_BN_CLICKED(IDC_BUTTON3, &Ccamera::OnBnClickedAsyncOpen)
 
 	ON_MESSAGE(WFS_OPEN_COMPLETE, &Ccamera::OnOpenComplete)
 	ON_MESSAGE(WFS_CLOSE_COMPLETE, &Ccamera::OnCloseComplete)
@@ -57,12 +65,12 @@ BEGIN_MESSAGE_MAP(Ccamera, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON4, &Ccamera::OnBnClickedCleanUp)
 	ON_BN_CLICKED(IDC_BUTTON5, &Ccamera::OnBnClickedClose)
 	ON_BN_CLICKED(IDC_BUTTON6, &Ccamera::OnBnClickedTakePicture)
-	ON_BN_CLICKED(IDC_BUTTON7, &Ccamera::OnBnClickedAsyncTakepictureex)
-	ON_BN_CLICKED(IDC_AsyncClose, &Ccamera::OnBnClickedAsyncclose)
+	//ON_BN_CLICKED(IDC_BUTTON7, &Ccamera::OnBnClickedAsyncTakepictureex)
+	//ON_BN_CLICKED(IDC_AsyncClose, &Ccamera::OnBnClickedAsyncclose)
 	ON_BN_CLICKED(IDC_TakePicture_Ex, &Ccamera::OnBnClickedTakepictureEx)
-	ON_BN_CLICKED(IDC_AsyncTakepicture, &Ccamera::OnBnClickedAsynctakepicture)
+	//ON_BN_CLICKED(IDC_AsyncTakepicture, &Ccamera::OnBnClickedAsynctakepicture)
 	ON_BN_CLICKED(IDC_Reset, &Ccamera::OnBnClickedReset)
-	ON_BN_CLICKED(IDC_Async_Reset, &Ccamera::OnBnClickedAsyncReset)
+	//ON_BN_CLICKED(IDC_Async_Reset, &Ccamera::OnBnClickedAsyncReset)
 END_MESSAGE_MAP()
 
 
@@ -130,7 +138,6 @@ LRESULT Ccamera::OnGetInfoComplete(WPARAM wParam, LPARAM lParam)
 
 	pwfsres->lpBuffer = pWESResult;
 	return nRes;
-	m_pXFSManager->WFSFreeResult (pWESResult);
 }
 
 LRESULT Ccamera::OnExecuteComplete(WPARAM wParam, LPARAM lParam)
@@ -295,61 +302,135 @@ void Ccamera::AsyncUnLock()
 
 void Ccamera::OnBnClickedOpen()
 {
+	
+
 	HRESULT hRes;
 	CString strTxt;
-	if ((hRes = m_pXFSManager->WFSOpen("ITASCamera", WFS_DEFAULT_HAPP, "CAMSPTest", WFS_TRACE_ALL_SPI,
-		WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService)) != WFS_SUCCESS)
+
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSOpen HRESULT = %d", hRes);
+		if ((hRes = m_pXFSManager->WFSOpen("ITASCamera", WFS_DEFAULT_HAPP, "CAMSPTest", WFS_TRACE_ALL_SPI,
+			WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSOpen HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSOpen completed");
+			m_btnOpen.EnableWindow(FALSE);
+			m_btnClose.EnableWindow(TRUE);
+			m_btnTakepic.EnableWindow(TRUE);
+			m_btnTakepicEx.EnableWindow(TRUE);
+			m_btnReset.EnableWindow(TRUE);
+		}
+		AppendStatus(strTxt);
+
+		if ((hRes = m_pXFSManager->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSRegister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSRegister completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+		Lock();
+		WFSRESULT* pwfsRes;
+		LPWFSCAMCAPS lpCaps;
+		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_CAM_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSGetInfo WFS_INF_CAM_CAPABILITIES HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpCaps = (LPWFSCAMCAPS)pwfsRes->lpBuffer;
+			strTxt.Format(L"WFSGetInfo - WFS_INF_CAM_CAPABILITIES completed\r\n");
+		}
+		AppendStatus(strTxt);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
+		pwfsRes = NULL;
+		LPWFSCAMSTATUS lpStatus;
+		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_CAM_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSGetInfo WFS_INF_CAM_STATUS HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpStatus = (LPWFSCAMSTATUS)pwfsRes->lpBuffer;
+			strTxt.Format(L"WFSGetInfo - WFS_INF_CAM_STATUS completed\r\n");
+		}
+		AppendStatus(strTxt);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
+		UnLock();
+
 	}
 	else
 	{
-		strTxt.Format(L"WFSOpen completed");
-	}
-	AppendStatus(strTxt);
+		HRESULT hRes;
+		CString strTxt;
+		if ((hRes = m_pXFSManager->WFSAsyncOpen("ITASCamera", WFS_DEFAULT_HAPP, "CAMSPTest", WFS_TRACE_ALL_SPI,
+			WFS_INDEFINITE_WAIT, &m_hService, m_hWnd, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncOpen HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncOpen completed");
+			m_btnOpen.EnableWindow(FALSE);
+			m_btnClose.EnableWindow(TRUE);
+			m_btnTakepic.EnableWindow(TRUE);
+			m_btnTakepicEx.EnableWindow(TRUE);
+			m_btnReset.EnableWindow(TRUE);
+		}
+		AppendStatus(strTxt);
 
-	if ((hRes = m_pXFSManager->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSRegister HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSRegister completed");
-	}
-	AppendStatus(strTxt);
+		if ((hRes = m_pXFSManager->WFSAsyncRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncRegister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncRegister completed");
+		}
+		AppendStatus(strTxt);
 
-	UnLock();
-	Lock();
-	WFSRESULT* pwfsRes;
-	LPWFSCAMCAPS lpCaps;
-	if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_CAM_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSGetInfo WFS_INF_CAM_CAPABILITIES HRESULT = %d", hRes);
-	}
-	else
-	{
-		lpCaps = (LPWFSCAMCAPS)pwfsRes->lpBuffer;
-		strTxt.Format(L"WFSGetInfo - WFS_INF_CAM_CAPABILITIES completed\r\n");
-	}
-	AppendStatus(strTxt);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		AsyncUnLock();
+		AsyncLock();
+		LPWFSCAMCAPS lpCaps;
+		if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_CAM_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncGetInfo WFS_INF_CAM_CAPABILITIES HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpCaps = (LPWFSCAMCAPS)pwfsres->lpBuffer;
+			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_CAM_CAPABILITIES completed\r\n");
+		}
+		AppendStatus(strTxt);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
-	pwfsRes = NULL;
-	LPWFSCAMSTATUS lpStatus;
-	if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_CAM_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSGetInfo WFS_INF_CAM_STATUS HRESULT = %d", hRes);
-	}
-	else
-	{
-		lpStatus = (LPWFSCAMSTATUS)pwfsRes->lpBuffer;
-		strTxt.Format(L"WFSGetInfo - WFS_INF_CAM_STATUS completed\r\n");
-	}
-	AppendStatus(strTxt);
-	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		pwfsres = NULL;
+		LPWFSCAMSTATUS lpStatus;
+		if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_CAM_STATUS, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncGetInfo WFS_INF_CAM_STATUS HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpStatus = (LPWFSCAMSTATUS)pwfsres->lpBuffer;
+			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_CAM_STATUS completed\r\n");
+		}
+		AppendStatus(strTxt);
+		m_pXFSManager->WFMFreeBuffer(pwfsres);
 
-	UnLock();
+		AsyncUnLock();
 
+	}
 }
 
 
@@ -364,12 +445,14 @@ void Ccamera::OnBnClickedStartup()
 	else
 	{
 		strTxt.Format(L"Camera   Startup completed ");
+		m_btnStartup.EnableWindow(FALSE);
+		m_btnOpen.EnableWindow(TRUE);
 	}
 	AppendStatus(strTxt);
 }
 
 
-void Ccamera::OnBnClickedAsyncOpen()
+/*void Ccamera::OnBnClickedAsyncOpen()
 {
 
 
@@ -426,7 +509,7 @@ void Ccamera::OnBnClickedAsyncOpen()
 	//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 	AsyncUnLock();
-}
+}*/
 
 
 void Ccamera::OnBnClickedCleanUp()
@@ -440,6 +523,8 @@ void Ccamera::OnBnClickedCleanUp()
 	else
 	{
 		strTxt.Format(L"WFSCleanUp completed");
+		m_btnStartup.EnableWindow(TRUE);
+		m_btnOpen.EnableWindow(FALSE);
 	}
 	AppendStatus(strTxt);
 }
@@ -447,30 +532,62 @@ void Ccamera::OnBnClickedCleanUp()
 
 
 void Ccamera::OnBnClickedClose()
-{
-	
+{	
 	HRESULT hRes;
 	CString strTxt;
-
-	if ((hRes = m_pXFSManager->WFSDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if(m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSDeregister HRESULT = %d", hRes);
+		if ((hRes = m_pXFSManager->WFSDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSDeregister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSDeregister completed");
+		}
+		AppendStatus(strTxt);
+
+		if ((hRes = m_pXFSManager->WFSClose(m_hService)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSClose HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSClose completed");
+			m_btnOpen.EnableWindow(TRUE);
+			m_btnClose.EnableWindow(FALSE);
+			m_btnTakepic.EnableWindow(FALSE);
+			m_btnTakepicEx.EnableWindow(FALSE);
+			m_btnReset.EnableWindow(FALSE);
+		}
+		AppendStatus(strTxt);
 	}
 	else
 	{
-		strTxt.Format(L"WFSDeregister completed");
-	}
-	AppendStatus(strTxt);
+		HRESULT hRes;
+		CString strTxt;
 
-	if ((hRes = m_pXFSManager->WFSClose(m_hService)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSClose HRESULT = %d", hRes);
+		if ((hRes = m_pXFSManager->WFSAsyncDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncDeregister HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncDeregister completed");
+		}
+		AppendStatus(strTxt);
+
+		if ((hRes = m_pXFSManager->WFSAsyncClose(m_hService, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncClose HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncClose completed");
+		}
+		AppendStatus(strTxt);
 	}
-	else
-	{
-		strTxt.Format(L"WFSClose completed");
-	}
-	AppendStatus(strTxt);
 }
 
 
@@ -483,26 +600,52 @@ void Ccamera::OnBnClickedTakePicture()
 	ipData.wCamera = WFS_CAM_PERSON;
 	ipData.lpszCamData = "Test Data from takepicture";
 	ipData.lpszUNICODECamData = NULL;
-
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE); // for checkbox enable and disable
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		Lock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_CMD_CAM_TAKE_PICTURE completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_CMD_CAM_TAKE_PICTURE completed");
-	}
-	AppendStatus(strTxt);
+		HRESULT hRes;
+		CString strTxt;
+		WFSCAMTAKEPICT ipData;
+		ipData.wCamera = WFS_CAM_PERSON;
+		ipData.lpszCamData = "Test Data from Async_takepicture";
+		ipData.lpszUNICODECamData = NULL;
 
-	UnLock();
-	
+		AsyncLock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_CMD_CAM_TAKE_PICTURE completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
+	}
 }
 
 
-void Ccamera::OnBnClickedAsyncTakepictureex()
+/*void Ccamera::OnBnClickedAsyncTakepictureex()
 {
 	HRESULT hRes;
 	CString strTxt;
@@ -525,39 +668,8 @@ void Ccamera::OnBnClickedAsyncTakepictureex()
 	}
 	AppendStatus(strTxt);
 
-	AsyncUnLock();
-
-
-	
-}
-
-
-void Ccamera::OnBnClickedAsyncclose()
-{
-	HRESULT hRes;
-	CString strTxt;
-
-	if ((hRes = m_pXFSManager->WFSAsyncDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT,m_hWnd, m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncDeregister HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncDeregister completed");
-	}
-	AppendStatus(strTxt);
-
-	if ((hRes = m_pXFSManager->WFSAsyncClose(m_hService,m_hWnd,&m_requestId)) != WFS_SUCCESS)
-	{
-		strTxt.Format(L"WFSAsyncClose HRESULT = %d", hRes);
-	}
-	else
-	{
-		strTxt.Format(L"WFSAsyncClose completed");
-	}
-	AppendStatus(strTxt);
-}
-
+	AsyncUnLock();	
+}*/
 
 void Ccamera::OnBnClickedTakepictureEx()
 {
@@ -568,26 +680,48 @@ void Ccamera::OnBnClickedTakepictureEx()
 	ipData.lpszCamData = "Test Data from takepicture ex";
 	ipData.lpszUNICODECamData = NULL;
 	ipData.lpszPictureFile = NULL;
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE_EX, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		Lock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE_EX, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute - WFS_CMD_CAM_TAKE_PICTURE_EX completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute - WFS_CMD_CAM_TAKE_PICTURE_EX completed");
+
+		AsyncLock();
+
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE_EX, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute - WFS_CMD_CAM_TAKE_PICTURE_EX completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
+
 	}
-	AppendStatus(strTxt);
-
-	UnLock();
-
-	
 }
 
 
-void Ccamera::OnBnClickedAsynctakepicture()
+/*void Ccamera::OnBnClickedAsynctakepicture()
 {
 	HRESULT hRes;
 	CString strTxt;
@@ -611,7 +745,7 @@ void Ccamera::OnBnClickedAsynctakepicture()
 
 	AsyncUnLock();
 
-}
+}*/
 
 
 void Ccamera::OnBnClickedReset()
@@ -619,25 +753,51 @@ void Ccamera::OnBnClickedReset()
 	HRESULT hRes;
 	CString strTxt;
 	WFSCAMTAKEPICTEX ipData;
-	Lock();
-
-	WFSRESULT* pwfsRes;
-	if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_RESET, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+	UpdateData(TRUE);
+	if (m_AsyncCheckVal == FALSE)
 	{
-		strTxt.Format(L"WFSExecute_Reset HRESULT = %d", hRes);
+
+		Lock();
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_RESET, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSExecute_Reset HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSExecute_Reset -WFS_CMD_CAM_RESET completed");
+		}
+		AppendStatus(strTxt);
+
+		UnLock();
+
 	}
 	else
 	{
-		strTxt.Format(L"WFSExecute_Reset -WFS_CMD_CAM_RESET completed");
-	}
-	AppendStatus(strTxt);
+		HRESULT hRes;
+		CString strTxt;
+		WFSCAMTAKEPICTEX ipData;
+		AsyncLock();
 
-	UnLock();
+		WFSRESULT* pwfsRes;
+		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_CAM_RESET, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSAsyncExecute_Reset HRESULT = %d", hRes);
+		}
+		else
+		{
+			strTxt.Format(L"WFSAsyncExecute_Reset -WFS_CMD_CAM_RESET completed");
+		}
+		AppendStatus(strTxt);
+
+		AsyncUnLock();
+
+	}
 
 }
 
 
-void Ccamera::OnBnClickedAsyncReset()
+/*void Ccamera::OnBnClickedAsyncReset()
 {
 	HRESULT hRes;
 	CString strTxt;
@@ -657,4 +817,30 @@ void Ccamera::OnBnClickedAsyncReset()
 
 	AsyncUnLock();
 
-}
+}*/
+
+/*void Ccamera::OnBnClickedAsyncclose()
+{
+	HRESULT hRes;
+	CString strTxt;
+
+	if ((hRes = m_pXFSManager->WFSAsyncDeregister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+	{
+		strTxt.Format(L"WFSAsyncDeregister HRESULT = %d", hRes);
+	}
+	else
+	{
+		strTxt.Format(L"WFSAsyncDeregister completed");
+	}
+	AppendStatus(strTxt);
+
+	if ((hRes = m_pXFSManager->WFSAsyncClose(m_hService, m_hWnd, &m_requestId)) != WFS_SUCCESS)
+	{
+		strTxt.Format(L"WFSAsyncClose HRESULT = %d", hRes);
+	}
+	else
+	{
+		strTxt.Format(L"WFSAsyncClose completed");
+	}
+	AppendStatus(strTxt);
+}*/
