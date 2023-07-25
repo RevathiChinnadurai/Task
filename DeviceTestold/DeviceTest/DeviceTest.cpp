@@ -55,6 +55,9 @@ BOOL CDeviceTestApp::InitInstance()
 
 	AfxEnableControlContainer();
 	AfxInitRichEdit2();
+
+
+
 	// Create the shell manager, in case the dialog contains
 	// any shell tree view or shell list view controls.
 	CShellManager *pShellManager = new CShellManager;

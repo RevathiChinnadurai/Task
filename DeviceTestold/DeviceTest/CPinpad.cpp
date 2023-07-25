@@ -339,7 +339,7 @@ void CPinpad::OnBnClickedStartup()
 	else
 	{
 		strTxt.Format(L"Startup completed");
-		//m_btnopen.EnableWindow(TRUE);
+		m_btnopen.EnableWindow(TRUE);
 
 
 	}
@@ -423,20 +423,20 @@ void CPinpad::OnBnClickedOpen()
 		else
 		{
 			strTxt.Format(L"WFSOpen completed");
-			//m_btnStartup.EnableWindow(FALSE);
-		//	m_btnclose.EnableWindow(TRUE);
-		//	m_btnhsm.EnableWindow(TRUE);
-		//	m_btndeletekey.EnableWindow(TRUE);
-		//	m_btnCryptdata.EnableWindow(TRUE);
-		//	m_btndeviceid.EnableWindow(TRUE);
-		//	m_btnfunkey.EnableWindow(TRUE);
-		//	m_btngetcaps.EnableWindow(TRUE);
-		//	m_btnGetpin.EnableWindow(TRUE);
-		//	m_btngetstatus.EnableWindow(TRUE);
-		//	m_btnkeydetails.EnableWindow(TRUE);
-		//	m_btnkeydetailsex.EnableWindow(TRUE);
-		//	m_btnloadkey.EnableWindow(TRUE);
-		//	m_btnsecurekey.EnableWindow(TRUE);
+			m_btnStartup.EnableWindow(FALSE);
+			m_btnclose.EnableWindow(TRUE);
+			m_btnhsm.EnableWindow(TRUE);
+			m_btndeletekey.EnableWindow(TRUE);
+			m_btnCryptdata.EnableWindow(TRUE);
+			m_btndeviceid.EnableWindow(TRUE);
+			m_btnfunkey.EnableWindow(TRUE);
+			m_btngetcaps.EnableWindow(TRUE);
+			m_btnGetpin.EnableWindow(TRUE);
+			m_btngetstatus.EnableWindow(TRUE);
+			m_btnkeydetails.EnableWindow(TRUE);
+			m_btnkeydetailsex.EnableWindow(TRUE);
+			m_btnloadkey.EnableWindow(TRUE);
+			m_btnsecurekey.EnableWindow(TRUE);
 
 		}
 		AppendStatus(strTxt);

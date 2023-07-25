@@ -5,7 +5,6 @@
 #include "Cprinter.h"
 #include "CPinpad.h"
 #include "CSensor.h"
-#include "XFSAPI.H"
 #pragma once
 
 
@@ -46,10 +45,7 @@ public:
 	Cprinter m_print;
 	CWnd* m_pwndShow;
 	CPinpad m_pinpad;
-
 	afx_msg void OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult);
 	
 	CSensor m_sensor;
-	
-
 };

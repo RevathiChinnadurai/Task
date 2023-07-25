@@ -125,16 +125,16 @@ BOOL CDeviceTestDlg::OnInitDialog()
 	m_tab.GetClientRect(&rect);
 	m_cam.Create(IDD_Camdlg, &m_tab);
 	m_cam.SetWindowPos(NULL, 5, 25, rect.Width() , rect.Height() , SWP_SHOWWINDOW | SWP_NOZORDER);
-//	m_cam.m_btnOpen.EnableWindow(FALSE);
-	//m_cam.m_btnClose.EnableWindow(FALSE);
-//	m_cam.m_btnTakepic.EnableWindow(FALSE);
-//	m_cam.m_btnTakepicEx.EnableWindow(FALSE);
-//	m_cam.m_btnReset.EnableWindow(FALSE);
+	m_cam.m_btnOpen.EnableWindow(FALSE);
+	m_cam.m_btnClose.EnableWindow(FALSE);
+	m_cam.m_btnTakepic.EnableWindow(FALSE);
+	m_cam.m_btnTakepicEx.EnableWindow(FALSE);
+	m_cam.m_btnReset.EnableWindow(FALSE);
 	m_pwndShow = &m_cam;
 
 	m_print.Create(IDD_Printerdlg, &m_tab);
 	m_print.SetWindowPos(NULL, 5, 25, rect.Width() , rect.Height() , SWP_NOSIZE | SWP_NOZORDER);
-/*	m_print.m_btnOpen.EnableWindow(FALSE);
+	m_print.m_btnOpen.EnableWindow(FALSE);
 	m_print.m_btnClose.EnableWindow(FALSE);
 	m_print.m_btnCutPaper.EnableWindow(FALSE);
 	m_print.m_btnPrintForm.EnableWindow(FALSE);
@@ -143,36 +143,36 @@ BOOL CDeviceTestDlg::OnInitDialog()
 	m_print.m_Dispense.EnableWindow(FALSE);
 	m_print.m_PrintData.EnableWindow(FALSE);
 	m_print.m_PrintFile.EnableWindow(FALSE);
-	m_print.m_editprintdata.EnableWindow(TRUE);*/
+	m_print.m_editprintdata.EnableWindow(TRUE);
 	m_pwndShow = &m_print;
 
 	m_pinpad.Create(IDD_Pinpaddlg, &m_tab);
 	m_pinpad.SetWindowPos(NULL, 5, 25, rect.Width(), rect.Height(), SWP_SHOWWINDOW | SWP_NOZORDER);
-	//m_pinpad.m_btnStartup.EnableWindow(TRUE);
-	//m_pinpad.m_btnopen.EnableWindow(FALSE);
-	//m_pinpad.m_btnclose.EnableWindow(FALSE);
-	//m_pinpad.m_btnhsm.EnableWindow(FALSE);
-	//m_pinpad.m_btndeletekey.EnableWindow(FALSE);
-	//m_pinpad.m_btnCryptdata.EnableWindow(FALSE);
-	//m_pinpad.m_btndeviceid.EnableWindow(FALSE);
-	//m_pinpad.m_btnfunkey.EnableWindow(FALSE);
-	//m_pinpad.m_btngetcaps.EnableWindow(FALSE);
-	//m_pinpad.m_btnGetpin.EnableWindow(FALSE);
-	//m_pinpad.m_btngetstatus.EnableWindow(FALSE);
-	//m_pinpad.m_btnkeydetails.EnableWindow(FALSE);
-	//m_pinpad.m_btnkeydetailsex.EnableWindow(FALSE);
-	//m_pinpad.m_btnloadkey.EnableWindow(FALSE);
-	//m_pinpad.m_btnsecurekey.EnableWindow(FALSE);
-	//m_pwndShow = &m_pinpad;
+	m_pinpad.m_btnStartup.EnableWindow(TRUE);
+	m_pinpad.m_btnopen.EnableWindow(FALSE);
+	m_pinpad.m_btnclose.EnableWindow(FALSE);
+	m_pinpad.m_btnhsm.EnableWindow(FALSE);
+	m_pinpad.m_btndeletekey.EnableWindow(FALSE);
+	m_pinpad.m_btnCryptdata.EnableWindow(FALSE);
+	m_pinpad.m_btndeviceid.EnableWindow(FALSE);
+	m_pinpad.m_btnfunkey.EnableWindow(FALSE);
+	m_pinpad.m_btngetcaps.EnableWindow(FALSE);
+	m_pinpad.m_btnGetpin.EnableWindow(FALSE);
+	m_pinpad.m_btngetstatus.EnableWindow(FALSE);
+	m_pinpad.m_btnkeydetails.EnableWindow(FALSE);
+	m_pinpad.m_btnkeydetailsex.EnableWindow(FALSE);
+	m_pinpad.m_btnloadkey.EnableWindow(FALSE);
+	m_pinpad.m_btnsecurekey.EnableWindow(FALSE);
+	m_pwndShow = &m_pinpad;
 
 	m_sensor.Create(IDD_SIUnitdlg, &m_tab);
 	m_sensor.SetWindowPos(NULL, 5, 25, rect.Width(), rect.Height(), SWP_SHOWWINDOW | SWP_NOZORDER);
-	//m_sensor.m_btnClose.EnableWindow(FALSE);
-	//m_sensor.m_btnOpen.EnableWindow(FALSE);
-	//m_sensor.m_btnCloseShutter.EnableWindow(FALSE);
-//	m_sensor.m_btnOpenShutter.EnableWindow(FALSE);
-	//m_sensor.m_btnGuideLight.EnableWindow(FALSE);
-	//m_pwndShow = &m_sensor;
+	m_sensor.m_btnClose.EnableWindow(FALSE);
+	m_sensor.m_btnOpen.EnableWindow(FALSE);
+	m_sensor.m_btnCloseShutter.EnableWindow(FALSE);
+	m_sensor.m_btnOpenShutter.EnableWindow(FALSE);
+	m_sensor.m_btnGuideLight.EnableWindow(FALSE);
+	m_pwndShow = &m_sensor;
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
 
@@ -244,20 +244,17 @@ void CDeviceTestDlg::OnTcnSelchangeTab1(NMHDR* pNMHDR, LRESULT* pResult)
 
 
 	case 1:
-		Sleep(100);
 		m_print.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_print;
 		break;
 
 
 	case 2:
-		Sleep(100);
 		m_pinpad.ShowWindow(SW_SHOWNORMAL);
 		m_pwndShow = &m_pinpad;
 		break;
 
 	case 3:
-		Sleep(100);
 		m_sensor.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_sensor;
 		break;

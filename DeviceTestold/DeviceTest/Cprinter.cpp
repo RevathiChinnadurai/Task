@@ -144,7 +144,7 @@ LRESULT Cprinter::OnGetInfoComplete(WPARAM wParam, LPARAM lParam)
 	LPWFSRESULT pWESResult = (LPWFSRESULT)lParam;
 	pwfsRes->lpBuffer = pWESResult;
 	return nRes;
-	//m_pXFSManager->WFSFreeResult(pWESResult);
+	m_pXFSManager->WFSFreeResult(pWESResult);
 }
 
 LRESULT Cprinter::OnExecuteComplete(WPARAM wParam, LPARAM lParam)
@@ -276,7 +276,7 @@ void Cprinter::Lock()
 {
 	HRESULT hRes;
 	CString strTxt;
-	//WFSRESULT* pwfsRes;
+	WFSRESULT* pwfsRes;
 	if ((hRes = m_pXFSManager->WFSLock(m_hService, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 	{
 		strTxt.Format(L"WFSOpen HRESULT = %d", hRes);
@@ -294,7 +294,7 @@ void Cprinter::AsyncLock()
 {
 	HRESULT hRes;
 	CString strTxt;
-	//WFSRESULT* pwfsRes;
+	WFSRESULT* pwfsRes;
 	if ((hRes = m_pXFSManager->WFSAsyncLock(m_hService, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 	{
 		strTxt.Format(L"WFSAsyncLock HRESULT = %d", hRes);
@@ -350,7 +350,6 @@ void Cprinter::OnBnClickedStartup()
 	{
 		strTxt.Format(L"Printer   Startup completed ");
 		m_btnOpen.EnableWindow(TRUE);
-
 	}
 	AppendStatus(strTxt);
 }
@@ -395,18 +394,16 @@ void Cprinter::OnBnClickedOpen()
 			strTxt.Format(L"WFSRegister completed");
 		}
 		AppendStatus(strTxt);
-	
+
 		UnLock();
 		Lock();
 		LPWFSPTRCAPS lpCaps;
-		//WFSRESULT* pwfsres;
 		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES HRESULT = %d", hRes);
 		}
 		else
 		{
-		
 			lpCaps = (LPWFSPTRCAPS)pwfsRes->lpBuffer;
 			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES completed\r\n");
 		}
@@ -441,6 +438,7 @@ void Cprinter::OnBnClickedOpen()
 			}
 			AppendStatus(strTxt);
 			m_pXFSManager->WFMFreeBuffer(pwfsRes);
+
 			pwfsRes = NULL;
 			LPSTR lpFormList = NULL;
 			if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_FORM_LIST, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
@@ -454,7 +452,7 @@ void Cprinter::OnBnClickedOpen()
 			}
 			AppendStatus(strTxt);
 			m_pXFSManager->WFMFreeBuffer(pwfsRes);
-	              /* CStringA str(lpFormList);
+	/*		CStringA str(lpFormList);
 
 			pwfsRes = NULL;
 			if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_PTR_QUERY_FORM, str.GetBuffer(), WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
@@ -494,7 +492,7 @@ void Cprinter::OnBnClickedOpen()
 		{
 
 		}
-		UnLock();    
+		UnLock();
 	}
 else
 {
@@ -530,7 +528,6 @@ else
 
 	AsyncUnLock();
 	AsyncLock();
-	
 	LPWFSPTRCAPS lpCaps;
 	if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_PTR_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 	{
@@ -571,7 +568,7 @@ else
 			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_PTR_MEDIA_LIST completed : %s\r\n", CString(lpMediaList));
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		pwfsRes = NULL;
 		LPSTR lpFormList = NULL;
@@ -820,7 +817,7 @@ void Cprinter::OnBnClickedPrintfile()
 		
 		Lock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_PRINT_RAW_FILE, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
@@ -837,7 +834,7 @@ void Cprinter::OnBnClickedPrintfile()
 	{
 		AsyncLock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_PRINT_RAW_FILE, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
@@ -870,7 +867,7 @@ void Cprinter::OnBnClickedPrintdata()
 	{
 		Lock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_RAW_DATA, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
@@ -887,7 +884,7 @@ void Cprinter::OnBnClickedPrintdata()
 	{
 		AsyncLock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_RAW_DATA, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
@@ -915,7 +912,7 @@ void Cprinter::OnBnClickedReset()
 	{
 		Lock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_RESET, &reset, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
@@ -932,7 +929,7 @@ void Cprinter::OnBnClickedReset()
 	{
 		AsyncLock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_PTR_RESET, &reset, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
@@ -961,7 +958,7 @@ void Cprinter::OnBnClickedDispensepaper()
 	{
 		Lock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_PTR_DISPENSE_PAPER, ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
@@ -1050,8 +1047,9 @@ void Cprinter::OnBnClickedPrintform()
 	CStringA strForm = "DemoForm";
 	CStringA strMedia = "Media";
 	CStringArray strField;
-	strField.Add(L"Name=REVATHI");
-	strField.Add(L"Account Number=22221111333");
+	strField.Add(L"Name=MOHANKUMAR");
+	strField.Add(L"Account Number=123456789");
+
 	char buff[1024] = { 0 };
 	int nLen = 0;
 	for (int i = 0; i < strField.GetCount(); i++)
@@ -1086,7 +1084,7 @@ void Cprinter::OnBnClickedPrintform()
 		}
 		else
 		{
-			strTxt.Format(L"WFSExecute - WFS_CMD_PTR_PRINT_FORM completed");
+			strTxt.Format(L"WFSExecute - WFS_CMD_PTR_DISPENSE_PAPER completed");
 		}
 		AppendStatus(strTxt);
 

@@ -31,8 +31,8 @@ protected:
 	WFSCAMTAKEPICT ipData;
 	WFSCAMTAKEPICTEX data;
 	REQUESTID m_requestId;
-	//WFSRESULT *pwfsres;
-	WFSRESULT *pwfsRes;
+	WFSRESULT *pwfsres;
+	//WFSRESULT* pwfsRes;
 	void AppendStatus(CString strTxt);
 
 

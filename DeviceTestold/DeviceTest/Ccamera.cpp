@@ -132,12 +132,12 @@ LRESULT Ccamera::OnDeregisterComplete(WPARAM wParam, LPARAM lParam)
 
 LRESULT Ccamera::OnGetInfoComplete(WPARAM wParam, LPARAM lParam)
 {
-	pwfsRes = (WFSRESULT*)lParam;
+	pwfsres = (WFSRESULT*)lParam;
 	LRESULT nRes = WFS_SUCCESS;
 	LPWFSRESULT pWESResult = (LPWFSRESULT)lParam;
-	pwfsRes->lpBuffer = pWESResult;
+
+	pwfsres->lpBuffer = pWESResult;
 	return nRes;
-	
 }
 
 LRESULT Ccamera::OnExecuteComplete(WPARAM wParam, LPARAM lParam)
@@ -240,7 +240,7 @@ void Ccamera::Lock()
 {
 	HRESULT hRes;
 	CString strTxt;
-	//WFSRESULT* pwfsRes;
+	WFSRESULT* pwfsRes;
 	if ((hRes = m_pXFSManager->WFSLock(m_hService, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 	{
 		strTxt.Format(L"WFSLock HRESULT = %d", hRes);
@@ -257,7 +257,7 @@ void Ccamera::AsyncLock()
 {
 	HRESULT hRes;
 	CString strTxt;
-	//WFSRESULT* pwfsRes;
+	WFSRESULT* pwfsRes;
 	if ((hRes = m_pXFSManager->WFSAsyncLock(m_hService, WFS_INDEFINITE_WAIT,m_hWnd,&m_requestId)) != WFS_SUCCESS)
 	{
 		strTxt.Format(L"WFSAsyncLock HRESULT = %d", hRes);
@@ -338,9 +338,8 @@ void Ccamera::OnBnClickedOpen()
 
 		UnLock();
 		Lock();
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		LPWFSCAMCAPS lpCaps;
-		HRESULT h;
 		if ((hRes = m_pXFSManager->WFSGetInfo(m_hService, WFS_INF_CAM_CAPABILITIES, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSGetInfo WFS_INF_CAM_CAPABILITIES HRESULT = %d", hRes);
@@ -351,17 +350,7 @@ void Ccamera::OnBnClickedOpen()
 			strTxt.Format(L"WFSGetInfo - WFS_INF_CAM_CAPABILITIES completed\r\n");
 		}
 		AppendStatus(strTxt);
-		h = m_pXFSManager->WFSFreeResult(pwfsRes);
-		if (h == WFS_SUCCESS)
-		{
-			strTxt.Format(L"WFSGetInfo - WFMFreeBuffer completed\r\n");
-		}
-		else
-		{
-			strTxt.Format(L"WFSGetInfo - WFMFreeBuffer failed %d", h);
-		}
-		UnLock();
-		AppendStatus(strTxt);
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		pwfsRes = NULL;
 		LPWFSCAMSTATUS lpStatus;
@@ -375,19 +364,10 @@ void Ccamera::OnBnClickedOpen()
 			strTxt.Format(L"WFSGetInfo - WFS_INF_CAM_STATUS completed\r\n");
 		}
 		AppendStatus(strTxt);
-		
-		h= m_pXFSManager->WFSFreeResult(pwfsRes);
-		if (h == WFS_SUCCESS)
-		{
-			strTxt.Format(L"WFSGetInfo - WFMFreeBuffer completed\r\n");
-		}
-		else 
-		{
+		m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
-			strTxt.Format(L"WFSGetInfo - WFMFreeBuffer failed = %d ",h);
-		}
 		UnLock();
-		AppendStatus(strTxt);
+
 	}
 	else
 	{
@@ -428,13 +408,13 @@ void Ccamera::OnBnClickedOpen()
 		}
 		else
 		{
-			lpCaps = (LPWFSCAMCAPS)pwfsRes->lpBuffer;
+			lpCaps = (LPWFSCAMCAPS)pwfsres->lpBuffer;
 			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_CAM_CAPABILITIES completed\r\n");
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFSFreeResult(pwfsRes);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
-		pwfsRes = NULL;
+		pwfsres = NULL;
 		LPWFSCAMSTATUS lpStatus;
 		if ((hRes = m_pXFSManager->WFSAsyncGetInfo(m_hService, WFS_INF_CAM_STATUS, NULL, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
@@ -442,11 +422,11 @@ void Ccamera::OnBnClickedOpen()
 		}
 		else
 		{
-			lpStatus = (LPWFSCAMSTATUS) pwfsRes->lpBuffer;
+			lpStatus = (LPWFSCAMSTATUS)pwfsres->lpBuffer;
 			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_CAM_STATUS completed\r\n");
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFSFreeResult(pwfsRes);
+		m_pXFSManager->WFMFreeBuffer(pwfsres);
 
 		AsyncUnLock();
 
@@ -625,7 +605,7 @@ void Ccamera::OnBnClickedTakePicture()
 	{
 		Lock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
@@ -649,7 +629,7 @@ void Ccamera::OnBnClickedTakePicture()
 
 		AsyncLock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
@@ -705,7 +685,7 @@ void Ccamera::OnBnClickedTakepictureEx()
 	{
 		Lock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE_EX, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute HRESULT = %d", hRes);
@@ -724,7 +704,7 @@ void Ccamera::OnBnClickedTakepictureEx()
 
 		AsyncLock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_CAM_TAKE_PICTURE_EX, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSAsyncExecute HRESULT = %d", hRes);
@@ -778,7 +758,7 @@ void Ccamera::OnBnClickedReset()
 	{
 
 		Lock();
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSExecute(m_hService, WFS_CMD_CAM_RESET, &ipData, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSExecute_Reset HRESULT = %d", hRes);
@@ -799,7 +779,7 @@ void Ccamera::OnBnClickedReset()
 		WFSCAMTAKEPICTEX ipData;
 		AsyncLock();
 
-		//WFSRESULT* pwfsRes;
+		WFSRESULT* pwfsRes;
 		if ((hRes = m_pXFSManager->WFSAsyncExecute(m_hService, WFS_CMD_CAM_RESET, &ipData, WFS_INDEFINITE_WAIT, m_hWnd, &m_requestId)) != WFS_SUCCESS)
 		{
 			strTxt.Format(L"WFSAsyncExecute_Reset HRESULT = %d", hRes);

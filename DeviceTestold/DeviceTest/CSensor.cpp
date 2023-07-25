@@ -369,7 +369,7 @@ void CSensor::OnBnClickedOpen()
 			strTxt.Format(L"WFSGetInfo - WFS_INF_SIU_CAPABILITIES completed\r\n");
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		pwfsRes = NULL;
 		LPWFSSIUSTATUS lpStatus;
@@ -383,7 +383,7 @@ void CSensor::OnBnClickedOpen()
 			strTxt.Format(L"WFSGetInfo - WFS_INF_SIU_STATUS completed\r\n");
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		UnLock();
 	}
@@ -427,7 +427,7 @@ void CSensor::OnBnClickedOpen()
 			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_SIU_CAPABILITIES completed\r\n");
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		pwfsRes = NULL;
 		LPWFSSIUSTATUS lpStatus;
@@ -441,7 +441,7 @@ void CSensor::OnBnClickedOpen()
 			strTxt.Format(L"WFSAsyncGetInfo - WFS_INF_SIU_STATUS completed\r\n");
 		}
 		AppendStatus(strTxt);
-		m_pXFSManager->WFMFreeBuffer(pwfsRes);
+		//m_pXFSManager->WFMFreeBuffer(pwfsRes);
 
 		AsyncUnLock();
 	}
