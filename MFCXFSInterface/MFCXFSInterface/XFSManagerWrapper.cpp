@@ -64,9 +64,6 @@ int XFSManagerWrapper::m_nCounter = 0;
 CCriticalSection g_CriticalSection;
 
 
-
-
-
 XFSManagerWrapper* XFSManagerWrapper::GetInstance()
 {
 	{

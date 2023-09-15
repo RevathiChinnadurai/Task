@@ -7,11 +7,12 @@ class messagewnd :public CWnd
 {
 public:
 	messagewnd();
+	//messagewnd();
 	
 public:
 	virtual ~messagewnd();
-
+	
 protected:
-	afx_msg LRESULT OnSystemEvent(WPARAM wParam, LPARAM lParam);
+		afx_msg LRESULT  OnSystemEvent(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 };
