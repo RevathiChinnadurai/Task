@@ -6,3 +6,4 @@ EXPORTS
 LoadXFS
 CleanXFS
 GetDeviceStatus
+DeviceInformation

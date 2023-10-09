@@ -37,23 +37,12 @@
 
 // CMFCXFSInterfaceApp
 
-BEGIN_MESSAGE_MAP(CMFCXFSInterfaceApp, CWinApp)
-	//ON_THREAD_MESSAGE(XFS_MSG_WFS_SYSTEMEVENT,OnSystemEventmessage)
-
-END_MESSAGE_MAP()
 
 
 // CMFCXFSInterfaceApp construction
 XFSManagerWrapper* m_pXFSManagerwrapper;
 
 
-void CMFCXFSInterfaceApp::OnSystemEventmessage(WPARAM wParam, LPARAM lParam)
-{
-	LPWFSRESULT pWESResult = (LPWFSRESULT)lParam;
-	//devicename = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
-	LOG_DATA(LOG_DEBUG, "thread messgae Called");
-
-}
 
 
 CMFCXFSInterfaceApp::CMFCXFSInterfaceApp()
@@ -90,15 +79,15 @@ HSERVICE m_hService;
 HWND m_hWnd=0;
 int deviceid;
 WFSVERSION  m_wfsXFSManagerVersion;
-bool camstatus;
-bool ptrstatus;
-bool pinstatus;
+bool bcamstatus, bptrstatus, bpinstatus,bsuistatus;
 CCriticalSection g_Critical;
-CEvent m_eventsystem;
 BOOL g_isBlocking;
-
+int camservice, ptrservice, pinservice,suiservice;
 CAutoLock AutoLock(&g_Critical);
-
+struct camerastatus
+{
+	CString camstate, cammedia, camfraudmodule, camstatus;
+}camera;
 
 BEGIN_MESSAGE_MAP(messagewnd, CWnd)
 	ON_MESSAGE(WFS_SYSTEM_EVENT, OnSystemEvent)
@@ -125,24 +114,19 @@ LRESULT  messagewnd::OnSystemEvent(WPARAM wParam, LPARAM lParam)
 		case WFS_SYSE_DEVICE_STATUS:
 		{
 			CString strTxt;
-	        pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
+			pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
 			if (pDevStatus->dwState == WFS_STAT_DEVONLINE)
 			{
-				camstatus = true;
+				bcamstatus = true;
 				strTxt.Format(L"Online");
 				CString strTxt = L"Online";
 				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
-				//SendMessage((UINT)pDevStatus, wParam, lParam);
-				//MessageBox(L"Camera Online", 0, 0);
-				
 			}
 			else
 			{
-				camstatus = false;
+				bcamstatus = false;
 				strTxt.Format(L"Camera offline");
 				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
-				//MessageBox(L"Camera Offline", 0, 0);
-				//AppendStatus(strTxt);
 			}
 		}
 		break;
@@ -194,18 +178,18 @@ LRESULT  messagewnd::OnSystemEvent(WPARAM wParam, LPARAM lParam)
 		case WFS_SYSE_DEVICE_STATUS:
 		{
 			CString strTxt;
-			 pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
+			pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
 			if (pDevStatus->dwState == WFS_STAT_DEVONLINE)
 			{
-				ptrstatus = true;
+				bptrstatus = true;
 				strTxt.Format(L"Printer online");
 				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
 				//MessageBox(L"Printer Online", 0, 0);
-				
+
 			}
 			else
 			{
-				ptrstatus = false;
+				bptrstatus = false;
 				strTxt.Format(L"Printer offline");
 				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
 				//MessageBox(L"Printer Offline", 0, 0);
@@ -265,18 +249,18 @@ LRESULT  messagewnd::OnSystemEvent(WPARAM wParam, LPARAM lParam)
 			LPWFSDEVSTATUS pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
 			if (pDevStatus->dwState == WFS_STAT_DEVONLINE)
 			{
-				pinstatus = true;
+				bpinstatus = true;
 				strTxt.Format(L"Pinpad online");
 				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
 				//MessageBox(L"PinPad Online", 0, 0);
 			}
 			else
 			{
-				pinstatus = false;
+				bpinstatus = false;
 				strTxt.Format(L"PinPad offline");
 				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
-			//	MessageBox(L"PinPad Offline", L"Device Status", 0);
-				//AppendStatus(strTxt);
+				//	MessageBox(L"PinPad Offline", L"Device Status", 0);
+					//AppendStatus(strTxt);
 			}
 		}
 		break;
@@ -316,11 +300,83 @@ LRESULT  messagewnd::OnSystemEvent(WPARAM wParam, LPARAM lParam)
 		break;
 		}
 	}
-	return nRes;
+	else if (strcmp(devicename->lpszPhysicalName, "ITASSensorUnit") == 0)
+	{
+		switch (pWESResult->u.dwEventID)
+		{
+		case WFS_SYSE_UNDELIVERABLE_MSG:
+		{
+			LPWFSUNDEVMSG pUnDelivMsg = (LPWFSUNDEVMSG)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_DEVICE_STATUS:
+		{
+			CString strTxt;
+			LPWFSDEVSTATUS pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
+			if (pDevStatus->dwState == WFS_STAT_DEVONLINE)
+			{
+				bsuistatus = true;
+				strTxt.Format(L"SIU online");
+				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
+			}
+			else
+			{
+				bsuistatus = false;
+				strTxt.Format(L"SIU offline");
+				LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
+				
+			}
+
+		}
+		break;
+		case WFS_SYSE_APP_DISCONNECT:
+		{
+			LPWFSAPPDISC pAppDisconnect = (LPWFSAPPDISC)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_HARDWARE_ERROR:
+		{
+			LPWFSHWERROR pError = (LPWFSHWERROR)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_SOFTWARE_ERROR:
+		{
+			LPWFSHWERROR pError = (LPWFSHWERROR)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_USER_ERROR:
+		{
+			LPWFSHWERROR pError = (LPWFSHWERROR)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_FRAUD_ATTEMPT:
+		{
+			LPWFSHWERROR pError = (LPWFSHWERROR)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_VERSION_ERROR:
+		{
+			LPWFSVRSNERROR pError = (LPWFSVRSNERROR)pWESResult->lpBuffer;
+		}
+		break;
+		case WFS_SYSE_LOCK_REQUESTED:
+		{
+		}
+		break;
+		}
+		return nRes;
+	}
 }
 
 
-
+void Appendstatus(CString strTxt)
+{
+	CString txt;
+	txt = strTxt;
+	txt.Append(_T("\r\n"));
+	txt += strTxt;
+	strTxt = txt;
+}
 DLLAPI_API HRESULT LoadXFS()
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -379,6 +435,7 @@ DLLAPI_API HRESULT GetDeviceStatus(LPSTR devicetype)
 	if (strcmp(devicetype,"Camera") ==0) { deviceid = 1; }
 	else if (strcmp(devicetype, "Printer") == 0) { deviceid = 2; }
 	else if (strcmp(devicetype, "Pinpad") == 0) { deviceid = 3; }
+	else if (strcmp(devicetype, "Sensor") == 0) { deviceid = 4; }
 
 	switch (deviceid)
 	{
@@ -391,32 +448,16 @@ DLLAPI_API HRESULT GetDeviceStatus(LPSTR devicetype)
 			WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService);
 		if (hres == WFS_SUCCESS)
 		{
+			CStringA str;
+			str.Format("Hservice = %d", m_hService);
+			camservice = m_hService;
+			LOG_DATA(LOG_ERROR, str.GetBuffer());
 			LOG_DATA(LOG_DEBUG, "WFSOpen Completed");	
 			AFX_MANAGE_STATE(AfxGetStaticModuleState());
-			m_eventsystem.ResetEvent();
 			hres = m_pXFSManagerwrapper->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd);
 			LOG_DATA(LOG_DEBUG, "WFSRegister Completed");
 			
-			//AutoLock.~CAutoLock();
-			//Blocking(m_eventsystem.m_hObject, WFS_INDEFINITE_WAIT);
-			
-			CString strTxt;
-			WFSRESULT* pwfsRes;
-			LPWFSCAMSTATUS lpStatus = NULL;
-			hres = m_pXFSManagerwrapper->WFSGetInfo(m_hService, WFS_INF_CAM_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes);
-			lpStatus = (LPWFSCAMSTATUS)pwfsRes->lpBuffer;
-			if (lpStatus != NULL)
-			{
-				strTxt.Format(L"WFSCAMSTATUS::fwCameras = %d  \n \
-								WFSCAMSTATUS::fwDevice = %d  \n \
-								WFSCAMSTATUS::fwMedia = %d \n  \
-								WFSCAMSTATUS::lpszExtra = %s \n  \
-								WFSCAMSTATUS::usPictures= %d \n \
-								WFSCAMSTATUS::wAntiFraudModule = %d \n", lpStatus->fwCameras[0], lpStatus->fwDevice, lpStatus->fwMedia[0], lpStatus->lpszExtra, lpStatus->usPictures[0], lpStatus->wAntiFraudModule);
-				
-				LOG_DATA(LOG_DEBUG,(CStringA)strTxt);
-			}
-			if (camstatus == true)
+			if (bcamstatus == true)
 			{
 				LOG_DATA(LOG_DEBUG, "Device is online ");
 				return 0;
@@ -442,13 +483,17 @@ DLLAPI_API HRESULT GetDeviceStatus(LPSTR devicetype)
 			WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService);
 		if (hRes == WFS_SUCCESS)
 		{
+			CStringA str;
+			str.Format("Hservice = %d", m_hService);
+			LOG_DATA(LOG_ERROR, str.GetBuffer());
+			ptrservice = m_hService;
 			LOG_DATA(LOG_DEBUG, "WFSOpen Completed");
 			AFX_MANAGE_STATE(AfxGetStaticModuleState());
 			hRes = m_pXFSManagerwrapper->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd);
 			LOG_DATA(LOG_DEBUG, "WFSRegister Completed");
 			//AutoLock.~CAutoLock();
 			//Blocking(m_eventsystem.m_hObject, WFS_INDEFINITE_WAIT);
-			if (ptrstatus == true)
+			if (bptrstatus == true)
 			{
 				LOG_DATA(LOG_DEBUG, "Device is online ");
 				return 0;
@@ -474,11 +519,41 @@ DLLAPI_API HRESULT GetDeviceStatus(LPSTR devicetype)
 			WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService);
 		if (hRes == WFS_SUCCESS)
 		{
+			pinservice = m_hService;
 			hRes = m_pXFSManagerwrapper->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd);
 			LOG_DATA(LOG_DEBUG, "WFSRegister Completed");
 		   // AutoLock.~CAutoLock();
 		  //Blocking(m_eventsystem.m_hObject, WFS_INDEFINITE_WAIT);
-			if (pinstatus == true)
+			if (bpinstatus == true)
+			{
+				LOG_DATA(LOG_DEBUG, "Device is online ");
+				return 0;
+			}
+			else
+			{
+				return 1;
+			}
+		}
+		else
+		{
+			return WFS_ERR_XFSMANAGER_ERROR;
+		}
+		
+	}break;
+	case 4:
+	{
+		HRESULT hRes;
+		AFX_MANAGE_STATE(AfxGetStaticModuleState());
+		hRes = m_pXFSManagerwrapper->WFSOpen("ITASSensorUnit", WFS_DEFAULT_HAPP, "SIUSPTest", WFS_TRACE_ALL_SPI,
+			WFS_INDEFINITE_WAIT, 0x00001403, &m_wfsServiceVersion, &m_wfsSPIVersion, &m_hService);
+		if (hRes == WFS_SUCCESS)
+		{
+			suiservice = m_hService;
+			hRes = m_pXFSManagerwrapper->WFSRegister(m_hService, WFS_EXECUTE_EVENT | WFS_USER_EVENT | WFS_SYSTEM_EVENT, m_hWnd);
+			LOG_DATA(LOG_DEBUG, "WFSRegister Completed");
+			// AutoLock.~CAutoLock();
+		   //Blocking(m_eventsystem.m_hObject, WFS_INDEFINITE_WAIT);
+			if (bsuistatus == true)
 			{
 				LOG_DATA(LOG_DEBUG, "Device is online ");
 				return 0;
@@ -488,13 +563,13 @@ DLLAPI_API HRESULT GetDeviceStatus(LPSTR devicetype)
 				return 1;
 			}
 
-			
+
 		}
 		else
 		{
 			return WFS_ERR_XFSMANAGER_ERROR;
 		}
-		
+
 	}break;
 	default:
 		MessageBox(0, L"Enter Valid Device Type", L"Warning", MB_OK);
@@ -531,5 +606,67 @@ void Blocking(HANDLE hHandle, DWORD dwTimeOut)
 
 	g_isBlocking = FALSE;
 	//g_BlockedHandle = 0;
+
+}
+DLLAPI_API HRESULT DeviceInformation(LPSTR devicename)
+{
+	if (strcmp(devicename, "Camera") == 0) { deviceid = 1; }
+	else if (strcmp(devicename, "Printer") == 0) { deviceid = 2; }
+	else if (strcmp(devicename, "Pinpad") == 0) { deviceid = 3; }
+	else if (strcmp(devicename, "Sensor") == 0) { deviceid = 4; }
+
+	switch (deviceid)
+	{
+	case 1:
+	{
+		HRESULT hres;
+		CString strTxt;
+		WFSRESULT* pwfsRes;
+		LPWFSCAMSTATUS lpStatus = NULL;
+		hres = m_pXFSManagerwrapper->WFSGetInfo(camservice, WFS_INF_CAM_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes);
+		lpStatus = (LPWFSCAMSTATUS)pwfsRes->lpBuffer;
+		if (lpStatus != NULL)
+		{
+			if (lpStatus->fwCameras[2] = 1) camera.camstate = "Good";
+			else camera.camstate = "Not Good";
+
+			if (bcamstatus == true) camera.camstatus = "Active";
+			else camera.camstatus = "Inactive";
+
+			if (lpStatus->fwMedia[2] == 0) camera.cammedia = "Good";
+			else camera.cammedia = "Not Good";
+			if (lpStatus->wAntiFraudModule == 0) camera.camfraudmodule = "Not Supported";
+		}
+		strTxt.Format (L"    Device Name : ITASCamera \n\
+    Camera Status : %s \n\
+        Camera State  : %s \n \
+        Media State   : %s \n \
+        Pictures Count : %d \n \
+        AntiFraudModule: %s",camera.camstatus,camera.camstate,camera.cammedia,lpStatus->usPictures[2], camera.camfraudmodule)
+			LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
+			//Appendstatus(strTxt);
+			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"INFO", 0);
+			return 0;
+		}
+
+	case 2:
+	{
+		HRESULT hRes;
+		CString strTxt;
+		WFSRESULT* pwfsRes;
+		LPWFSPTRSTATUS lpStatus;
+		if ((hRes = m_pXFSManagerwrapper->WFSGetInfo(m_hService, WFS_INF_PTR_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpStatus = (LPWFSPTRSTATUS)pwfsRes->lpBuffer;
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES completed\r\n");
+		}
+
+	}
+
+	}
 
 }

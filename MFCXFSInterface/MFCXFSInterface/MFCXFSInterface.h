@@ -26,12 +26,11 @@ public:
 public:
 	
 	virtual BOOL InitInstance();
-	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSystemEventmessage(WPARAM wParam, LPARAM lParam);
+	
 };
-
+void Appendstatus(CString strTxt);
 DLLAPI_API HRESULT LoadXFS();
 DLLAPI_API HRESULT CleanXFS();
 DLLAPI_API HRESULT GetDeviceStatus(LPSTR devicetype);
-void Blocking(HANDLE hHandle, DWORD dwTimeOut);
-
+DLLAPI_API HRESULT DeviceInformation(LPSTR devicename);
+//void Blocking(HANDLE hHandle, DWORD dwTimeOut);
