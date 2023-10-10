@@ -104,6 +104,7 @@ namespace WindowsFormsApp1
             else
             {
                 pictureBox5.Image = Properties.Resources.off;
+                button1.Enabled = false;
                 // label3.ForeColor = Color.Red;
                 //  label2.Text = "Camera Offline";
             }
@@ -117,7 +118,7 @@ namespace WindowsFormsApp1
             else
             {
                 pictureBox11.Image = Properties.Resources.off;
-                
+                button2.Enabled = false;
             }
 
             IntPtr result2 = GetDeviceStatus("Pinpad");
@@ -129,7 +130,7 @@ namespace WindowsFormsApp1
             else
             {
                 pictureBox6.Image = Properties.Resources.off;
-               
+                button3.Enabled = false;
             }
             IntPtr result3 = GetDeviceStatus("Sensor");
             if (result3 == IntPtr.Zero)
@@ -140,14 +141,17 @@ namespace WindowsFormsApp1
             else
             {
                 pictureBox12.Image = Properties.Resources.off;
-
+                button4.Enabled = false;
             }
-
+            button5.Enabled = false;
+            button6.Enabled = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             IntPtr result = DeviceInformation("Camera");
+            
+                
             if (result == IntPtr.Zero)
             {
                 label2.Text = "Status Information";
@@ -164,6 +168,30 @@ namespace WindowsFormsApp1
         }
 
         private void button3_Click(object sender, EventArgs e)
+        {
+            IntPtr result = DeviceInformation("Pinpad");
+            if (result == IntPtr.Zero)
+            {
+                label2.Text = "Status Information Pinpad";
+            }
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.Application.Exit();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void button6_Click(object sender, EventArgs e)
         {
 
         }

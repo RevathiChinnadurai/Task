@@ -66,11 +66,16 @@ BOOL CMFCXFSInterfaceApp::InitInstance()
 
 	return TRUE;
 }
-//BOOL CMFCXFSInterfaceApp::ExitInstance()
-//{
-//	PostThreadMessage(WM_QUIT,0,0);
-	//return CWinApp::ExitInstance();
-//}
+
+struct camerastatus
+{
+	CString camname, camstate, cammedia, camfraudmodule, camstatus;
+}camera;
+
+struct ptrstatus
+{
+	CString ptrname, ptrstate, ptrmedia, ptrpprstate, ptrpprtype;
+}printer;
 
 messagewnd* m_pWnd;
 WFSVERSION m_wfsServiceVersion;
@@ -84,10 +89,7 @@ CCriticalSection g_Critical;
 BOOL g_isBlocking;
 int camservice, ptrservice, pinservice,suiservice;
 CAutoLock AutoLock(&g_Critical);
-struct camerastatus
-{
-	CString camstate, cammedia, camfraudmodule, camstatus;
-}camera;
+
 
 BEGIN_MESSAGE_MAP(messagewnd, CWnd)
 	ON_MESSAGE(WFS_SYSTEM_EVENT, OnSystemEvent)
@@ -103,7 +105,7 @@ LRESULT  messagewnd::OnSystemEvent(WPARAM wParam, LPARAM lParam)
 
 	if (strcmp(devicename->lpszPhysicalName, "ITASCamera") == 0)
 	{
-
+		camera.camname = (CString)devicename->lpszPhysicalName;
 		switch (pWESResult->u.dwEventID)
 		{
 		case WFS_SYSE_UNDELIVERABLE_MSG:
@@ -177,6 +179,7 @@ LRESULT  messagewnd::OnSystemEvent(WPARAM wParam, LPARAM lParam)
 		break;
 		case WFS_SYSE_DEVICE_STATUS:
 		{
+			printer.ptrname =(CString) devicename->lpszPhysicalName;
 			CString strTxt;
 			pDevStatus = (LPWFSDEVSTATUS)pWESResult->lpBuffer;
 			if (pDevStatus->dwState == WFS_STAT_DEVONLINE)
@@ -637,14 +640,7 @@ DLLAPI_API HRESULT DeviceInformation(LPSTR devicename)
 			else camera.cammedia = "Not Good";
 			if (lpStatus->wAntiFraudModule == 0) camera.camfraudmodule = "Not Supported";
 		}
-		strTxt.Format (L"    Device Name : ITASCamera \n\
-    Camera Status : %s \n\
-        Camera State  : %s \n \
-        Media State   : %s \n \
-        Pictures Count : %d \n \
-        AntiFraudModule: %s",camera.camstatus,camera.camstate,camera.cammedia,lpStatus->usPictures[2], camera.camfraudmodule)
-			LOG_DATA(LOG_DEBUG, (CStringA)strTxt);
-			//Appendstatus(strTxt);
+		strTxt.Format(L"Device Name : %s\n\Camera Status : %s\n \Camera State  : %s\n \Media State   : %s\n \Pictures Count : %d\n \AntiFraudModule: %s", camera.camname, camera.camstatus, camera.camstate, camera.cammedia, lpStatus->usPictures[1], camera.camfraudmodule);
 			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"INFO", 0);
 			return 0;
 		}
@@ -655,16 +651,59 @@ DLLAPI_API HRESULT DeviceInformation(LPSTR devicename)
 		CString strTxt;
 		WFSRESULT* pwfsRes;
 		LPWFSPTRSTATUS lpStatus;
-		if ((hRes = m_pXFSManagerwrapper->WFSGetInfo(m_hService, WFS_INF_PTR_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		if ((hRes = m_pXFSManagerwrapper->WFSGetInfo(ptrservice, WFS_INF_PTR_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
 		{
-			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES HRESULT = %d", hRes);
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_STATUS HRESULT = %d", hRes);
 		}
 		else
 		{
 			lpStatus = (LPWFSPTRSTATUS)pwfsRes->lpBuffer;
-			strTxt.Format(L"WFSGetInfo - WFS_INF_PTR_CAPABILITIES completed\r\n");
-		}
+			if (lpStatus != NULL)
+			{
+				if (lpStatus->fwMedia == 0) printer.ptrmedia = " GOOD";
+				else printer.ptrmedia = "Not Good";
+				if (lpStatus->fwPaper[0] == 0) printer.ptrpprstate = "Good";
+				else printer.ptrpprstate = "Not Good";
+				if (bptrstatus == true) printer.ptrstate = "Active";
+				else printer.ptrstate = "Inactive";
+				if (lpStatus->wPaperType[0] == 0) printer.ptrpprtype = "Single sided";
+			}
+			strTxt.Format(L"Device Name   :  %s\n \Printer Status  :   %s\n \Media State     :   Good\n \Paper State     :   Paper Full\n \Paper Type      :   %s\n \ ", printer.ptrname, printer.ptrstate, printer.ptrpprtype);
+			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"INFO", 0);
+			return 0;
+		}break;
 
+	}
+	case 3:
+	{
+		HRESULT hRes;
+		CString strTxt;
+		WFSRESULT* pwfsRes = NULL;
+		LPWFSPINSTATUS lpStatus = NULL;
+		if ((hRes = m_pXFSManagerwrapper->WFSGetInfo(pinservice, WFS_INF_PIN_STATUS, NULL, WFS_INDEFINITE_WAIT, &pwfsRes)) != WFS_SUCCESS)
+		{
+			strTxt.Format(L"WFSGetInfo WFS_INF_PIN_STATUS HRESULT = %d", hRes);
+		}
+		else
+		{
+			lpStatus = (LPWFSPINSTATUS)pwfsRes->lpBuffer;
+			strTxt.Format(L"WFSGetInfo - WFS_INF_PIN_STATUS completed\r\n");
+		}
+		if (lpStatus != NULL)
+		{
+			strTxt.FormatMessage(L"WFSPINSTATUS::fwDevice = %d \n \
+		WFSPINSTATUS::fwEncStat = %d \n \
+		WFSPINSTATUS::lpszExtra = %s \n \
+		WFSPINSTATUS::fwAutoBeepMode = %d \n \
+		WFSPINSTATUS::dwCertificateState = %d \n \
+		WFSPINSTATUS::wDevicePosition = %d \n \
+		WFSPINSTATUS::usPowerSaveRecoveryTime = %d \n \
+		WFSPINSTATUS::wAntiFraudModule = %d \n ",
+				lpStatus->fwDevice, lpStatus->fwEncStat, lpStatus->lpszExtra, lpStatus->fwAutoBeepMode, lpStatus->dwCertificateState,
+				lpStatus->wDevicePosition, lpStatus->usPowerSaveRecoveryTime, lpStatus->wAntiFraudModule);
+		}
+		MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"INFO", 0);
+		return 0;
 	}
 
 	}

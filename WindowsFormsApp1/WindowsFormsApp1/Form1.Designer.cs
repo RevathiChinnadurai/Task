@@ -37,6 +37,8 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.button7 = new System.Windows.Forms.Button();
+            this.pictureBox20 = new System.Windows.Forms.PictureBox();
             this.pictureBox19 = new System.Windows.Forms.PictureBox();
             this.button6 = new System.Windows.Forms.Button();
             this.pictureBox18 = new System.Windows.Forms.PictureBox();
@@ -62,7 +64,7 @@
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.pictureBox20 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox20)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox19)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox18)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox17)).BeginInit();
@@ -82,7 +84,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox20)).BeginInit();
             this.SuspendLayout();
             // 
             // label2
@@ -126,6 +127,22 @@
             resources.ApplyResources(this.label8, "label8");
             this.label8.Name = "label8";
             // 
+            // button7
+            // 
+            this.button7.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.close;
+            resources.ApplyResources(this.button7, "button7");
+            this.button7.FlatAppearance.BorderColor = System.Drawing.Color.White;
+            this.button7.Name = "button7";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // pictureBox20
+            // 
+            this.pictureBox20.Image = global::WindowsFormsApp1.Properties.Resources.Accezzlogo;
+            resources.ApplyResources(this.pictureBox20, "pictureBox20");
+            this.pictureBox20.Name = "pictureBox20";
+            this.pictureBox20.TabStop = false;
+            // 
             // pictureBox19
             // 
             resources.ApplyResources(this.pictureBox19, "pictureBox19");
@@ -136,8 +153,10 @@
             // 
             this.button6.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button6, "button6");
+            this.button6.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button6.Name = "button6";
             this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
             // pictureBox18
             // 
@@ -163,8 +182,10 @@
             // 
             this.button5.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button5, "button5");
+            this.button5.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button5.Name = "button5";
             this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
             // pictureBox15
             // 
@@ -188,10 +209,13 @@
             // 
             // button4
             // 
+            this.button4.BackColor = System.Drawing.Color.White;
             this.button4.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button4, "button4");
+            this.button4.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button4.Name = "button4";
-            this.button4.UseVisualStyleBackColor = true;
+            this.button4.UseVisualStyleBackColor = false;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // pictureBox12
             // 
@@ -211,6 +235,7 @@
             // 
             this.button3.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button3, "button3");
+            this.button3.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button3.Name = "button3";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
@@ -219,6 +244,7 @@
             // 
             this.button2.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button2, "button2");
+            this.button2.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button2.Name = "button2";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
@@ -228,6 +254,7 @@
             this.button1.BackColor = System.Drawing.Color.Transparent;
             this.button1.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button1, "button1");
+            this.button1.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button1.Name = "button1";
             this.button1.UseVisualStyleBackColor = false;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -296,18 +323,13 @@
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.TabStop = false;
             // 
-            // pictureBox20
-            // 
-            this.pictureBox20.Image = global::WindowsFormsApp1.Properties.Resources.Accezzlogo;
-            resources.ApplyResources(this.pictureBox20, "pictureBox20");
-            this.pictureBox20.Name = "pictureBox20";
-            this.pictureBox20.TabStop = false;
-            // 
             // Form1
             // 
+            this.AllowDrop = true;
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
+            this.Controls.Add(this.button7);
             this.Controls.Add(this.pictureBox20);
             this.Controls.Add(this.pictureBox19);
             this.Controls.Add(this.button6);
@@ -347,6 +369,7 @@
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox20)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox19)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox18)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox17)).EndInit();
@@ -366,7 +389,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox20)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -407,6 +429,7 @@
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.PictureBox pictureBox19;
         private System.Windows.Forms.PictureBox pictureBox20;
+        private System.Windows.Forms.Button button7;
     }
 }
 
