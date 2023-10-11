@@ -105,6 +105,7 @@ namespace WindowsFormsApp1
             {
                 pictureBox5.Image = Properties.Resources.off;
                 button1.Enabled = false;
+                button1.BackgroundImage = Properties.Resources.infoicon1;
                 // label3.ForeColor = Color.Red;
                 //  label2.Text = "Camera Offline";
             }
@@ -118,6 +119,7 @@ namespace WindowsFormsApp1
             else
             {
                 pictureBox11.Image = Properties.Resources.off;
+                button2.BackgroundImage = Properties.Resources.infoicon1;
                 button2.Enabled = false;
             }
 
@@ -130,6 +132,7 @@ namespace WindowsFormsApp1
             else
             {
                 pictureBox6.Image = Properties.Resources.off;
+                button3.BackgroundImage = Properties.Resources.infoicon1;
                 button3.Enabled = false;
             }
             IntPtr result3 = GetDeviceStatus("Sensor");
@@ -142,6 +145,7 @@ namespace WindowsFormsApp1
             {
                 pictureBox12.Image = Properties.Resources.off;
                 button4.Enabled = false;
+            
             }
             button5.Enabled = false;
             button6.Enabled = false;
@@ -154,7 +158,7 @@ namespace WindowsFormsApp1
                 
             if (result == IntPtr.Zero)
             {
-                label2.Text = "Status Information";
+                //label2.Text = "Status Information";
             }
         }
 
@@ -163,7 +167,7 @@ namespace WindowsFormsApp1
             IntPtr result = DeviceInformation("Printer");
             if (result == IntPtr.Zero)
             {
-                label2.Text = "Status Information printer";
+                //label2.Text = "Status Information printer";
             }
         }
 
@@ -172,7 +176,7 @@ namespace WindowsFormsApp1
             IntPtr result = DeviceInformation("Pinpad");
             if (result == IntPtr.Zero)
             {
-                label2.Text = "Status Information Pinpad";
+               // label2.Text = "Status Information Pinpad";
             }
         }
 

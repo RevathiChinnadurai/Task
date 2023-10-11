@@ -93,31 +93,31 @@
     <None Include="Resources\Accezzlogo1.jpeg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\off.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\on.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\infoicon.jpeg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\images.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\cashdispenser.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\cashdispenser.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\information.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\device.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\off.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\infodb.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\info.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\infoicon.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

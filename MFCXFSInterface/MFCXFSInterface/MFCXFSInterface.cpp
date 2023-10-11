@@ -640,8 +640,8 @@ DLLAPI_API HRESULT DeviceInformation(LPSTR devicename)
 			else camera.cammedia = "Not Good";
 			if (lpStatus->wAntiFraudModule == 0) camera.camfraudmodule = "Not Supported";
 		}
-		strTxt.Format(L"Device Name : %s\n\Camera Status : %s\n \Camera State  : %s\n \Media State   : %s\n \Pictures Count : %d\n \AntiFraudModule: %s", camera.camname, camera.camstatus, camera.camstate, camera.cammedia, lpStatus->usPictures[1], camera.camfraudmodule);
-			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"INFO", 0);
+		strTxt.Format(L" Device Name : %s\n\Camera Status : %s\n \Camera State  : %s\n \Media State   : %s\n \Pictures Count : %d\n \AntiFraudModule: %s", camera.camname, camera.camstatus, camera.camstate, camera.cammedia, lpStatus->usPictures[1], camera.camfraudmodule);
+			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"Camera Info", 0);
 			return 0;
 		}
 
@@ -660,7 +660,7 @@ DLLAPI_API HRESULT DeviceInformation(LPSTR devicename)
 			lpStatus = (LPWFSPTRSTATUS)pwfsRes->lpBuffer;
 			if (lpStatus != NULL)
 			{
-				if (lpStatus->fwMedia == 0) printer.ptrmedia = " GOOD";
+				if (lpStatus->fwMedia == 0) printer.ptrmedia = "GOOD";
 				else printer.ptrmedia = "Not Good";
 				if (lpStatus->fwPaper[0] == 0) printer.ptrpprstate = "Good";
 				else printer.ptrpprstate = "Not Good";
@@ -669,7 +669,7 @@ DLLAPI_API HRESULT DeviceInformation(LPSTR devicename)
 				if (lpStatus->wPaperType[0] == 0) printer.ptrpprtype = "Single sided";
 			}
 			strTxt.Format(L"Device Name   :  %s\n \Printer Status  :   %s\n \Media State     :   Good\n \Paper State     :   Paper Full\n \Paper Type      :   %s\n \ ", printer.ptrname, printer.ptrstate, printer.ptrpprtype);
-			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"INFO", 0);
+			MessageBox(NULL, (LPCWSTR)strTxt.GetBuffer(), L"Printer Info", 0);
 			return 0;
 		}break;
 

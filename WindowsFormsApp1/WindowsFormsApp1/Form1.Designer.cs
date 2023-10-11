@@ -151,7 +151,7 @@
             // 
             // button6
             // 
-            this.button6.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
+            this.button6.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon1;
             resources.ApplyResources(this.button6, "button6");
             this.button6.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button6.Name = "button6";
@@ -160,7 +160,6 @@
             // 
             // pictureBox18
             // 
-            this.pictureBox18.Image = global::WindowsFormsApp1.Properties.Resources.off;
             resources.ApplyResources(this.pictureBox18, "pictureBox18");
             this.pictureBox18.Name = "pictureBox18";
             this.pictureBox18.TabStop = false;
@@ -180,7 +179,7 @@
             // 
             // button5
             // 
-            this.button5.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
+            this.button5.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon1;
             resources.ApplyResources(this.button5, "button5");
             this.button5.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button5.Name = "button5";
@@ -189,7 +188,6 @@
             // 
             // pictureBox15
             // 
-            this.pictureBox15.Image = global::WindowsFormsApp1.Properties.Resources.off;
             resources.ApplyResources(this.pictureBox15, "pictureBox15");
             this.pictureBox15.Name = "pictureBox15";
             this.pictureBox15.TabStop = false;
@@ -210,7 +208,7 @@
             // button4
             // 
             this.button4.BackColor = System.Drawing.Color.White;
-            this.button4.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
+            this.button4.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon1;
             resources.ApplyResources(this.button4, "button4");
             this.button4.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button4.Name = "button4";
@@ -219,7 +217,6 @@
             // 
             // pictureBox12
             // 
-            this.pictureBox12.Image = global::WindowsFormsApp1.Properties.Resources.off;
             resources.ApplyResources(this.pictureBox12, "pictureBox12");
             this.pictureBox12.Name = "pictureBox12";
             this.pictureBox12.TabStop = false;
@@ -233,7 +230,6 @@
             // 
             // button3
             // 
-            this.button3.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button3, "button3");
             this.button3.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button3.Name = "button3";
@@ -242,7 +238,6 @@
             // 
             // button2
             // 
-            this.button2.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button2, "button2");
             this.button2.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button2.Name = "button2";
@@ -252,7 +247,6 @@
             // button1
             // 
             this.button1.BackColor = System.Drawing.Color.Transparent;
-            this.button1.BackgroundImage = global::WindowsFormsApp1.Properties.Resources.infoicon;
             resources.ApplyResources(this.button1, "button1");
             this.button1.FlatAppearance.BorderColor = System.Drawing.Color.White;
             this.button1.Name = "button1";
@@ -261,7 +255,6 @@
             // 
             // pictureBox6
             // 
-            this.pictureBox6.Image = global::WindowsFormsApp1.Properties.Resources.off;
             resources.ApplyResources(this.pictureBox6, "pictureBox6");
             this.pictureBox6.Name = "pictureBox6";
             this.pictureBox6.TabStop = false;
@@ -293,7 +286,6 @@
             // 
             // pictureBox5
             // 
-            this.pictureBox5.Image = global::WindowsFormsApp1.Properties.Resources.off;
             resources.ApplyResources(this.pictureBox5, "pictureBox5");
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.TabStop = false;
